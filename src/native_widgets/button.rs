@@ -40,7 +40,6 @@ impl<S, M: Clone> Widget<S, M> for Button<M> {
 	}
 
 	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
-		println!("{:?} layout: {:?}", self.id, ctx.layout());
 		ctx.rect(widget::paint::DrawMode::Fill, ctx.layout().rect);
 	}
 }

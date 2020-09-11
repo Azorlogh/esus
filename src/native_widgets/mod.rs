@@ -9,3 +9,6 @@ pub use label::*;
 
 mod empty;
 pub use empty::*;
+
+mod sized_box;
+pub use sized_box::SizedBox;

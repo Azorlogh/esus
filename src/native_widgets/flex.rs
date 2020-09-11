@@ -61,20 +61,6 @@ impl<S, M> Widget<S, M> for Flex {
 		self.id
 	}
 
-	// fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
-	// 	let mut width: f64 = ctx.sc.width;
-
-	// 	let mut height: f64 = 0.0;
-	// 	for id in &self.children {
-	// 		let size = ctx.sizes[id];
-	// 		let rect = Rect::new(0.0, height, width, height + size.height);
-	// 		ctx.layout_suggestions
-	// 			.insert(*id, Layout { rect, depth: 0.0 });
-	// 		height += size.height;
-	// 	}
-	// 	Size { width, height }
-	// }
-
 	fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
 		ctx.sc.max
 	}

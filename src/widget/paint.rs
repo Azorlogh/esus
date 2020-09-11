@@ -1,7 +1,6 @@
 use crate::painter::Painter;
 use crate::render::RenderCtx;
-use crate::widget::Layout;
-use kurbo::{Point, Rect};
+use crate::{Layout, Rect};
 
 pub struct PaintCtx<'a, 'r, S> {
 	pub render_ctx: &'a mut RenderCtx<'r>,
@@ -24,11 +23,20 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 		);
 	}
 
-	pub fn print(&mut self, pos: Point, text: &str) {
+	pub fn print(&mut self, rect: Rect, text: &str) {
 		let section = wgpu_glyph::Section::default()
-			.add_text(wgpu_glyph::Text::new(text).with_color([1.0, 1.0, 1.0, 1.0]))
-			.with_screen_position((pos.x as f32, pos.y as f32))
-			.with_layout(wgpu_glyph::Layout::default().h_align(wgpu_glyph::HorizontalAlign::Left));
+			.add_text(
+				wgpu_glyph::Text::new(text)
+					.with_color([1.0, 1.0, 1.0, 1.0])
+					.with_scale(12.0),
+			)
+			.with_screen_position((rect.x0 as f32, rect.y0 as f32))
+			.with_bounds((rect.x1 as f32, rect.y1 as f32))
+			.with_layout(
+				wgpu_glyph::Layout::default()
+					.h_align(wgpu_glyph::HorizontalAlign::Left)
+					.v_align(wgpu_glyph::VerticalAlign::Center),
+			);
 
 		self.painter.glyph_brush.queue(section);
 		self.painter
