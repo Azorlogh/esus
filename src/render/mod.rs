@@ -1,8 +1,10 @@
-use winit::window::Window;
+use winit::{dpi::PhysicalSize, window::Window};
 
 pub struct Renderer {
 	pub device: wgpu::Device,
 	pub queue: wgpu::Queue,
+	pub surface: wgpu::Surface,
+	pub sc_desc: wgpu::SwapChainDescriptor,
 	pub swapchain: wgpu::SwapChain,
 	pub size: winit::dpi::PhysicalSize<u32>,
 }
@@ -30,23 +32,30 @@ impl Renderer {
 			})
 			.await;
 
-		let swapchain = device.create_swap_chain(
-			&surface,
-			&wgpu::SwapChainDescriptor {
-				usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
-				format: wgpu::TextureFormat::Bgra8UnormSrgb,
-				width: size.width,
-				height: size.height,
-				present_mode: wgpu::PresentMode::Mailbox,
-			},
-		);
+		let sc_desc = wgpu::SwapChainDescriptor {
+			usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+			format: wgpu::TextureFormat::Bgra8UnormSrgb,
+			width: size.width,
+			height: size.height,
+			present_mode: wgpu::PresentMode::Mailbox,
+		};
+
+		let swapchain = device.create_swap_chain(&surface, &sc_desc);
 
 		Renderer {
 			device,
 			queue,
+			surface,
+			sc_desc,
 			swapchain,
 			size,
 		}
+	}
+
+	pub fn resize(&mut self, size: PhysicalSize<u32>) {
+		self.sc_desc.width = size.width;
+		self.sc_desc.height = size.height;
+		self.swapchain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
 	}
 }
 

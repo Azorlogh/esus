@@ -1,4 +1,4 @@
-use kurbo::Size;
+use crate::{Layout, Size};
 
 pub mod id;
 pub use id::Id;
@@ -16,7 +16,7 @@ pub mod size;
 pub use size::SizeCtx;
 
 pub mod layout;
-pub use layout::{Layout, LayoutCtx};
+pub use layout::LayoutCtx;
 
 pub mod pod;
 pub use pod::Pod;
@@ -30,13 +30,13 @@ pub trait Widget<S, M> {
 	// for event handling
 	fn event(&mut self, _ctx: &mut EventCtx<S, M>) {}
 
-	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
+	fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
 		ctx.sc.max
 	}
 
 	// to inform the instance of this widget's Layout
-	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
-		ctx.suggested
+	fn layout(&mut self, ctx: &mut LayoutCtx<S, M>) -> Layout {
+		ctx.suggestion
 	}
 
 	// for painting
@@ -46,7 +46,7 @@ pub trait Widget<S, M> {
 pub mod prelude {
 	pub use crate::{
 		event::Event,
-		widget::{self, EventCtx, Id, Layout, LayoutCtx, PaintCtx, SizeCtx, ViewCtx, Widget},
-		Rect, Size,
+		widget::{self, EventCtx, Id, LayoutCtx, PaintCtx, SizeCtx, ViewCtx, Widget},
+		Layout, Rect, Size,
 	};
 }

@@ -1,4 +1,4 @@
-use super::{EventCtx, Id, Layout, LayoutCtx, PaintCtx, Size, Widget};
+use super::{EventCtx, Id, Layout, LayoutCtx, PaintCtx, Size, SizeCtx, Widget};
 use std::collections::HashSet;
 
 pub struct Pod<S, M> {
@@ -21,20 +21,20 @@ impl<S, M> Pod<S, M> {
 	}
 }
 
-impl<S, M> Widget<S, M> for Pod<S, M> {
-	fn id(&self) -> Id {
-		self.inner.id()
-	}
-
-	fn event(&mut self, ctx: &mut EventCtx<S, M>) {
+impl<S, M> Pod<S, M> {
+	pub fn event(&mut self, ctx: &mut EventCtx<S, M>) {
 		self.inner.event(ctx)
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
-		self.inner.layout(ctx)
+	pub fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
+		self.inner.size(ctx)
 	}
 
-	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
+	pub fn layout(&mut self, ctx: &mut LayoutCtx<S, M>) {
+		self.layout = Some(self.inner.layout(ctx));
+	}
+
+	pub fn paint(&mut self, ctx: &mut PaintCtx<S>) {
 		self.inner.paint(ctx)
 	}
 }

@@ -30,7 +30,7 @@ fn main() {
 				LabelText::Dynamic(Box::new(|s: &State| format!("{}", s.count))),
 			);
 			let b1 = Button::new(ctx).on_click(Message::Decrement);
-			Flex::new(ctx)
+			Flex::column(ctx)
 				.with_child(ctx, b0)
 				.with_child(ctx, label)
 				.with_child(ctx, b1)

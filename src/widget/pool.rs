@@ -1,11 +1,11 @@
-use crate::widget::{self, EventCtx, Id, Layout, LayoutCtx, Pod, SizeCtx, Widget};
+use crate::widget::{self, EventCtx, Id, Layout, LayoutCtx, Pod, Widget};
 use crate::{device::DeviceStates, event::Event};
 use crate::{
 	painter::Painter,
 	render::{self, Renderer},
 	widget::PaintCtx,
 };
-use crate::{Size, SizeConstraints};
+use crate::{Rect, Size};
 use std::collections::{HashMap, VecDeque};
 
 pub enum PoolMessage<S, M> {
@@ -17,7 +17,7 @@ pub enum PoolMessage<S, M> {
 
 pub struct Pool<S, M> {
 	pub last_id: Id,
-	widgets: HashMap<Id, widget::Pod<S, M>>,
+	pub widgets: HashMap<Id, widget::Pod<S, M>>,
 	root: Option<Id>,
 	order: Vec<Id>,
 }
@@ -44,16 +44,19 @@ impl<S, M> Pool<S, M> {
 		let id = widget.id();
 		let pod = Pod::new(None, widget);
 		self.widgets.insert(id, pod);
+		self.root = Some(id);
 	}
 
 	pub fn add_child_widget(&mut self, parent_id: Id, widget: Box<dyn Widget<S, M>>) {
 		let id = widget.id();
-		if let Some(parent) = self.widgets.get_mut(&parent_id) {
-			let pod = Pod::new(Some(parent_id), widget);
-			parent.children.insert(id);
-		} else {
-			log::error!("specified parent does not exist");
-		}
+		let mut parent = self
+			.widgets
+			.remove(&parent_id)
+			.expect("specified parent does not exist");
+		let pod = Pod::new(Some(parent_id), widget);
+		self.widgets.insert(id, pod);
+		parent.children.insert(id);
+		self.widgets.insert(parent_id, parent);
 	}
 
 	// pub fn resolve_layout<'a>(&mut self, state: &'a S) {
@@ -81,16 +84,35 @@ impl<S, M> Pool<S, M> {
 	// }
 
 	pub fn resolve_layout<'a>(&mut self, state: &'a S, size: Size) {
-		// figure out sizes
-		{
-			let ctx = SizeCtx {
-				state: &mut state,
-				sc: SizeConstraints {
-					min: size,
-					max: size,
-				},
-			};
-		}
+		let root_id = self.root.unwrap();
+		let mut root = self.widgets.remove(&root_id).unwrap(); // fix this
+		let mut ctx = LayoutCtx::new(
+			state,
+			self,
+			Layout {
+				rect: Rect::from_origin_size((0.0, 0.0), size),
+				depth: 0.0,
+			},
+		);
+		root.layout(&mut ctx);
+
+		let mut order: Vec<Id> = self
+			.widgets
+			.iter()
+			.filter_map(|(&id, widget)| {
+				if widget.layout.is_some() {
+					Some(id)
+				} else {
+					None
+				}
+			})
+			.collect();
+		order.sort_by(|a, b| {
+			let a_depth = self.widgets.get(a).unwrap().layout.unwrap().depth;
+			let b_depth = self.widgets.get(b).unwrap().layout.unwrap().depth;
+			a_depth.partial_cmp(&b_depth).unwrap()
+		});
+		self.order = order;
 	}
 
 	pub fn paint(&mut self, renderer: &mut Renderer, painter: &mut Painter, state: &S) {

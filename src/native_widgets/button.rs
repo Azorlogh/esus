@@ -24,7 +24,7 @@ impl<S, M: Clone> Widget<S, M> for Button<M> {
 		self.id
 	}
 
-	fn size(&mut self, _ctx: &mut SizeCtx<S>) -> Size {
+	fn size(&mut self, _ctx: &mut SizeCtx<S, M>) -> Size {
 		Size::new(100.0, 20.0)
 	}
 
@@ -40,6 +40,7 @@ impl<S, M: Clone> Widget<S, M> for Button<M> {
 	}
 
 	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
+		println!("{:?} layout: {:?}", self.id, ctx.layout());
 		ctx.rect(widget::paint::DrawMode::Fill, ctx.layout().rect);
 	}
 }

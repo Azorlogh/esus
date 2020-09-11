@@ -41,12 +41,12 @@ impl<S, M: Clone> Widget<S, M> for Label<S> {
 		self.id
 	}
 
-	fn size(&mut self, _ctx: &mut SizeCtx<S>) -> Size {
-		Size::new(100.0, 100.0)
+	fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
+		ctx.sc.max
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
-		ctx.suggested_layout()
+	fn layout(&mut self, ctx: &mut LayoutCtx<S, M>) -> Layout {
+		ctx.suggestion
 	}
 
 	fn paint(&mut self, ctx: &mut PaintCtx<S>) {

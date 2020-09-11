@@ -4,6 +4,7 @@ use crate::{
 	painter::Painter,
 	render::Renderer,
 	widget::{self, Id, ViewCtx, Widget},
+	Size,
 };
 use kurbo::Point;
 use std::os::raw::c_void;
@@ -63,7 +64,7 @@ impl<S, M> Builder<S, M> {
 
 			let root = Box::new(builder(&mut ctx));
 
-			self.view.add_widget(None, root);
+			self.view.set_root_widget(root);
 
 			for msg in ctx.pool_queue {
 				self.view.handle_message(msg);
@@ -84,10 +85,10 @@ impl<S, M> Builder<S, M> {
 
 	pub fn build(self) -> Instance<S, M> {
 		let event_loop = EventLoop::new();
-		let mut window_builder = WindowBuilder::new().with_title(self.title);
-		if let Some(handle) = self.parent_window {
-			// window_builder = window_builder.with_parent_window(handle as HWND);
-		}
+		let window_builder = WindowBuilder::new().with_title(self.title);
+		// if let Some(handle) = self.parent_window {
+		// 	window_builder = window_builder.with_parent_window(handle as HWND);
+		// }
 		let window = window_builder.build(&event_loop).unwrap();
 		let renderer = futures::executor::block_on(Renderer::new(&window));
 		let painter = Painter::new(&renderer.device);
@@ -95,7 +96,14 @@ impl<S, M> Builder<S, M> {
 		let state = self.state.expect("no state was provided");
 		let mut view = self.view;
 
-		view.resolve_layout(&state);
+		let size = window.inner_size();
+		view.resolve_layout(
+			&state,
+			Size {
+				width: size.width as f64,
+				height: size.height as f64,
+			},
+		);
 
 		Instance {
 			event_loop,
@@ -153,6 +161,12 @@ impl<D, M> Instance<D, M> {
 				} => {
 					*dead = true;
 					*control_flow = ControlFlow::Exit
+				}
+				wevent::Event::WindowEvent {
+					event: wevent::WindowEvent::Resized(size),
+					..
+				} => {
+					renderer.resize(size);
 				}
 				wevent::Event::RedrawRequested(_) => {
 					view.paint(renderer, painter, state);
