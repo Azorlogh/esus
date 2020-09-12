@@ -24,6 +24,9 @@ pub use pod::Pod;
 pub mod pool;
 pub use pool::{Pool, PoolMessage};
 
+mod ext;
+pub use ext::WidgetExt;
+
 pub trait Widget<S, M> {
 	fn id(&self) -> Id;
 

@@ -1,11 +1,14 @@
-trait WidgetExt {
-	fn fix_width(self, width: f64) -> SizedBox<S> {
-		SizedBox::new(self).width(width)
+use super::{ViewCtx, Widget};
+use crate::native_widgets::*;
+
+pub trait WidgetExt<S, M>: Widget<S, M> + Sized + 'static {
+	fn fix_width(self, ctx: &mut ViewCtx<S, M>, width: f64) -> SizedBox {
+		SizedBox::new(ctx, self).fix_width(width)
 	}
 
-	fn fix_height(self, height: f64) -> SizedBox<S> {
-		SizedBox::new(self).height(height)
+	fn fix_height(self, ctx: &mut ViewCtx<S, M>, height: f64) -> SizedBox {
+		SizedBox::new(ctx, self).fix_height(height)
 	}
 }
 
-impl<S, M, W: Widget<S, M>> WidgetExt<S, M> for W {}
+impl<S, M, W: Widget<S, M> + 'static> WidgetExt<S, M> for W {}

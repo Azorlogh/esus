@@ -66,6 +66,12 @@ impl<S, M> Builder<S, M> {
 
 			self.view.set_root_widget(root);
 
+			for msg in &ctx.pool_queue {
+				match msg {
+					widget::PoolMessage::AddWidget { parent, .. } => println!("{:?}", parent),
+				}
+			}
+
 			for msg in ctx.pool_queue {
 				self.view.handle_message(msg);
 			}

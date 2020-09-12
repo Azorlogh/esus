@@ -49,6 +49,7 @@ impl<S, M> Pool<S, M> {
 
 	pub fn add_child_widget(&mut self, parent_id: Id, widget: Box<dyn Widget<S, M>>) {
 		let id = widget.id();
+		println!("adding child widget {:?} to {:?}", id, parent_id);
 		let mut parent = self
 			.widgets
 			.remove(&parent_id)

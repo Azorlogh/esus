@@ -1,6 +1,7 @@
 use esus::{
 	instance,
 	native_widgets::{Button, Flex, Label, LabelText},
+	widget::WidgetExt,
 };
 
 struct State {
@@ -28,7 +29,8 @@ fn main() {
 			let label = Label::new(
 				ctx,
 				LabelText::Dynamic(Box::new(|s: &State| format!("{}", s.count))),
-			);
+			)
+			.fix_height(ctx, 100.0);
 			let b1 = Button::new(ctx).on_click(Message::Decrement);
 			Flex::column(ctx)
 				.with_child(ctx, b0)
