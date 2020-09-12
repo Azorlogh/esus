@@ -25,11 +25,9 @@ pub mod pool;
 pub use pool::{Pool, PoolMessage};
 
 mod ext;
-pub use ext::WidgetExt;
+// pub use ext::WidgetExt;
 
 pub trait Widget<S, M> {
-	fn id(&self) -> Id;
-
 	// for event handling
 	fn event(&mut self, _ctx: &mut EventCtx<S, M>) {}
 

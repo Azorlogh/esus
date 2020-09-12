@@ -7,14 +7,14 @@ pub enum Axis {
 }
 
 impl Axis {
-	fn major<T, V: Into<(T, T)>>(&self, coords: V) -> T {
+	pub fn major<T, V: Into<(T, T)>>(&self, coords: V) -> T {
 		match *self {
 			Axis::X => coords.into().0,
 			Axis::Y => coords.into().1,
 		}
 	}
 
-	fn with_major<T, V: Into<(T, T)> + From<(T, T)>>(&self, coords: V, value: T) -> V {
+	pub fn with_major<T, V: Into<(T, T)> + From<(T, T)>>(&self, coords: V, value: T) -> V {
 		let mut t = coords.into();
 		match *self {
 			Axis::X => t.0 = value,

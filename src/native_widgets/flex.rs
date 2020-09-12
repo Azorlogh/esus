@@ -10,57 +10,44 @@ pub struct ChildWidget {
 
 pub struct Flex {
 	axis: Axis,
-	id: Id,
 	children: Vec<ChildWidget>,
 }
 
 impl Flex {
-	pub fn row<'a, S, M>(ctx: &mut ViewCtx<'a, S, M>) -> Flex {
+	pub fn row() -> Flex {
 		Flex {
 			axis: Axis::X,
-			id: ctx.acquire_id(),
 			children: vec![],
 		}
 	}
-	pub fn column<'a, S, M>(ctx: &mut ViewCtx<'a, S, M>) -> Flex {
+	pub fn column() -> Flex {
 		Flex {
 			axis: Axis::Y,
-			id: ctx.acquire_id(),
 			children: vec![],
 		}
 	}
 
-	pub fn with_child<'a, S, M>(
-		mut self,
-		ctx: &mut ViewCtx<'a, S, M>,
-		w: impl Widget<S, M> + 'static,
-	) -> Flex {
-		self.children.push(ChildWidget {
-			id: ctx.add_widget(self.id, w),
-			flex: 0.0,
-		});
+	pub fn with_child(mut self, c: widget::Id) -> Flex {
+		self.children.push(ChildWidget { id: c, flex: 0.0 });
 		self
 	}
 
-	pub fn with_flex_child<'a, S, M>(
-		mut self,
-		ctx: &mut ViewCtx<'a, S, M>,
-		w: impl Widget<S, M> + 'static,
-		flex: f64,
-	) -> Flex {
-		self.children.push(ChildWidget {
-			id: ctx.add_widget(self.id, w),
-			flex,
-		});
+	pub fn with_flex_child(mut self, c: widget::Id, flex: f64) -> Flex {
+		self.children.push(ChildWidget { id: c, flex });
 		self
+	}
+
+	pub fn register<'a, S, M>(self, ctx: &mut ViewCtx<'a, S, M>) -> Id {
+		let children = self.children.iter().map(|c| c.id).collect::<Vec<Id>>();
+		let id = ctx.register(self);
+		for child in children {
+			ctx.set_child(id, child);
+		}
+		id
 	}
 }
 
 impl<S, M> Widget<S, M> for Flex {
-	fn id(&self) -> Id {
-		self.id
-	}
-
 	fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
 		ctx.sc.max
 	}
@@ -74,39 +61,34 @@ impl<S, M> Widget<S, M> for Flex {
 		};
 		// figure out non-flex children's total height
 		let mut flex_total = 0.0;
-		let mut remaining_height = size.height;
+		let mut remaining_major = self.axis.major(size);
 		for child in &mut self.children {
 			flex_total += child.flex;
 			if child.flex == 0.0 {
 				let size = ctx.get_size(child.id, constraints);
-				remaining_height -= size.height;
+				remaining_major -= self.axis.major(size);
 			}
 		}
 
 		// lay the children out
-		let mut curr_y = 0.0;
+		let mut curr_major = 0.0;
 		for child in &mut self.children {
-			if child.flex == 0.0 {
-				let size = ctx.get_size(child.id, constraints);
-				ctx.set_layout(
-					child.id,
-					Layout {
-						rect: Rect::from_origin_size((0.0, curr_y), size),
-						depth: 0.0,
-					},
-				);
-				curr_y += size.height;
+			let size = if child.flex == 0.0 {
+				ctx.get_size(child.id, constraints)
 			} else {
-				let size = Size::new(size.width, remaining_height * (child.flex / flex_total));
-				ctx.set_layout(
-					child.id,
-					Layout {
-						rect: Rect::from_origin_size((0.0, curr_y), size),
-						depth: 0.0,
-					},
-				);
-				curr_y += size.height;
-			}
+				Size::new(size.width, remaining_major * (child.flex / flex_total))
+			};
+			ctx.set_layout(
+				child.id,
+				Layout {
+					rect: Rect::from_origin_size(
+						self.axis.with_major((0.0, 0.0), curr_major),
+						size,
+					),
+					depth: 0.0,
+				},
+			);
+			curr_major += self.axis.major(size);
 		}
 
 		log::warn!("flex layout done!");

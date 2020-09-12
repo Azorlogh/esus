@@ -2,28 +2,24 @@ use crate::widget::prelude::*;
 
 pub struct Button<M> {
 	msg: Option<M>,
-	id: Id,
 }
 
-impl<M> Button<M> {
-	pub fn new<S>(ctx: &mut ViewCtx<S, M>) -> Button<M> {
-		Button {
-			id: ctx.acquire_id(),
-			msg: None,
-		}
+impl<M: Clone + 'static> Button<M> {
+	pub fn new() -> Button<M> {
+		Button { msg: None }
 	}
 
 	pub fn on_click(mut self, msg: M) -> Button<M> {
 		self.msg = Some(msg);
 		self
 	}
+
+	pub fn register<'a, S>(self, ctx: &mut ViewCtx<'a, S, M>) -> Id {
+		ctx.register(self)
+	}
 }
 
 impl<S, M: Clone> Widget<S, M> for Button<M> {
-	fn id(&self) -> Id {
-		self.id
-	}
-
 	fn size(&mut self, _ctx: &mut SizeCtx<S, M>) -> Size {
 		Size::new(100.0, 20.0)
 	}

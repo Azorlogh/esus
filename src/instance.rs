@@ -3,7 +3,7 @@ use crate::{
 	event::*,
 	painter::Painter,
 	render::Renderer,
-	widget::{self, Id, ViewCtx, Widget},
+	widget::{self, Id, ViewCtx},
 	Size,
 };
 use kurbo::Point;
@@ -23,7 +23,6 @@ pub struct Builder<S, M> {
 	size: PhysicalSize<u32>,
 	state: Option<S>,
 	updater: Option<Box<dyn Fn(&mut S, M)>>,
-	last_id: Id,
 	view: widget::Pool<S, M>,
 }
 
@@ -35,7 +34,6 @@ impl<S, M> Builder<S, M> {
 			size: (100, 100).into(),
 			state: None,
 			updater: None,
-			last_id: Id::initial(),
 			view: widget::Pool::new(),
 		}
 	}
@@ -55,26 +53,13 @@ impl<S, M> Builder<S, M> {
 		self
 	}
 
-	pub fn with_view<W>(mut self, builder: impl Fn(&mut ViewCtx<S, M>) -> W + 'static) -> Self
-	where
-		W: Widget<S, M> + 'static,
-	{
+	pub fn with_view(mut self, builder: impl Fn(&mut ViewCtx<S, M>) -> Id + 'static) -> Self {
 		{
-			let mut ctx = ViewCtx::new(&mut self.last_id);
+			let mut ctx = ViewCtx::new(&mut self.view);
 
-			let root = Box::new(builder(&mut ctx));
+			let root = builder(&mut ctx);
 
 			self.view.set_root_widget(root);
-
-			for msg in &ctx.pool_queue {
-				match msg {
-					widget::PoolMessage::AddWidget { parent, .. } => println!("{:?}", parent),
-				}
-			}
-
-			for msg in ctx.pool_queue {
-				self.view.handle_message(msg);
-			}
 		}
 		self
 	}

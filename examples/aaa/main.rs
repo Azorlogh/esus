@@ -1,7 +1,6 @@
 use esus::{
 	instance,
 	native_widgets::{Button, Flex, Label, LabelText},
-	widget::WidgetExt,
 };
 
 struct State {
@@ -25,17 +24,18 @@ fn main() {
 			Message::Decrement => state.count -= 1,
 		})
 		.with_view(|ctx| {
-			let b0 = Button::new(ctx).on_click(Message::Increment);
-			let label = Label::new(
-				ctx,
-				LabelText::Dynamic(Box::new(|s: &State| format!("{}", s.count))),
-			)
+			let b0 = Button::new().on_click(Message::Increment).register(ctx);
+			let label = Label::new(LabelText::Dynamic(Box::new(|s: &State| {
+				format!("{}", s.count)
+			})))
+			.register(ctx)
 			.fix_height(ctx, 100.0);
-			let b1 = Button::new(ctx).on_click(Message::Decrement);
-			Flex::column(ctx)
-				.with_child(ctx, b0)
-				.with_child(ctx, label)
-				.with_child(ctx, b1)
+			let b1 = Button::new().on_click(Message::Decrement).register(ctx);
+			Flex::row()
+				.with_child(b0)
+				.with_child(label)
+				.with_child(b1)
+				.register(ctx)
 		})
 		.build();
 

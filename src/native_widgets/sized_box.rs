@@ -1,27 +1,31 @@
 use crate::{
-	widget::{self, Id, LayoutCtx, SizeCtx, ViewCtx, Widget},
-	Axis, Layout, Rect, Size, SizeConstraints,
+	widget::{Id, LayoutCtx, SizeCtx, ViewCtx, Widget},
+	Layout, Size,
 };
 
 pub struct SizedBox {
-	id: Id,
 	child: Option<Id>,
 	width: Option<f64>,
 	height: Option<f64>,
 }
 
 impl SizedBox {
-	pub fn new<'a, S, M>(
-		ctx: &mut ViewCtx<'a, S, M>,
-		child: impl Widget<S, M> + 'static,
-	) -> SizedBox {
-		let id = ctx.acquire_id();
-		SizedBox {
-			id,
-			child: Some(ctx.add_widget(id, child)),
+	pub fn new(child: Id) -> SizedBox {
+		let id = SizedBox {
+			child: Some(child),
 			width: None,
 			height: None,
+		};
+		id
+	}
+
+	pub fn register<'a, S, M>(self, ctx: &mut ViewCtx<'a, S, M>) -> Id {
+		let child = self.child;
+		let id = ctx.register(self);
+		if let Some(child) = child {
+			ctx.set_child(id, child);
 		}
+		id
 	}
 
 	pub fn fix_width(mut self, width: f64) -> Self {
@@ -36,10 +40,6 @@ impl SizedBox {
 }
 
 impl<S, M> Widget<S, M> for SizedBox {
-	fn id(&self) -> Id {
-		self.id
-	}
-
 	fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
 		let mut size = if let Some(child) = self.child {
 			ctx.get_size(child, ctx.sc)

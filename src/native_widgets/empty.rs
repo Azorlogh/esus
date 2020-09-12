@@ -1,19 +1,15 @@
 use crate::widget::{Id, ViewCtx, Widget};
 
-pub struct Empty {
-	id: Id,
-}
+pub struct Empty;
 
 impl Empty {
-	pub fn new<'a, S, M>(ctx: &mut ViewCtx<'a, S, M>) -> Empty {
-		Empty {
-			id: ctx.acquire_id(),
-		}
+	pub fn new() -> Empty {
+		Empty
+	}
+
+	pub fn register<'a, S, M>(self, ctx: &mut ViewCtx<'a, S, M>) -> Id {
+		ctx.register(self)
 	}
 }
 
-impl<S, M> Widget<S, M> for Empty {
-	fn id(&self) -> Id {
-		self.id
-	}
-}
+impl<S, M> Widget<S, M> for Empty {}

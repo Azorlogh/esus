@@ -32,33 +32,52 @@ impl<S, M> Pool<S, M> {
 		}
 	}
 
-	pub fn handle_message(&mut self, msg: PoolMessage<S, M>) {
-		match msg {
-			PoolMessage::AddWidget { parent, widget } => {
-				self.add_child_widget(parent, widget);
-			}
-		}
-	}
+	// pub fn handle_message(&mut self, msg: PoolMessage<S, M>) {
+	// 	match msg {
+	// 		PoolMessage::AddWidget { parent, widget } => {
+	// 			self.add_child_widget(parent, widget);
+	// 		}
+	// 	}
+	// }
 
-	pub fn set_root_widget(&mut self, widget: Box<dyn Widget<S, M>>) {
-		let id = widget.id();
-		let pod = Pod::new(None, widget);
-		self.widgets.insert(id, pod);
+	pub fn set_root_widget(&mut self, id: Id) {
 		self.root = Some(id);
 	}
 
-	pub fn add_child_widget(&mut self, parent_id: Id, widget: Box<dyn Widget<S, M>>) {
-		let id = widget.id();
-		println!("adding child widget {:?} to {:?}", id, parent_id);
+	pub fn add_widget(&mut self, widget: impl Widget<S, M> + 'static) -> Id {
+		let id = self.last_id.next();
+		let pod = Pod::new(None, Box::new(widget));
+		self.widgets.insert(id, pod);
+		id
+	}
+
+	pub fn set_widget_child(&mut self, parent_id: Id, child_id: Id) {
 		let mut parent = self
 			.widgets
 			.remove(&parent_id)
 			.expect("specified parent does not exist");
-		let pod = Pod::new(Some(parent_id), widget);
-		self.widgets.insert(id, pod);
-		parent.children.insert(id);
+		let mut child = self
+			.widgets
+			.remove(&child_id)
+			.expect("specified child does not exist");
+		parent.children.insert(child_id);
+		child.parent = Some(parent_id);
 		self.widgets.insert(parent_id, parent);
+		self.widgets.insert(child_id, child);
 	}
+
+	// pub fn add_child_widget(&mut self, parent_id: Id, widget: Box<dyn Widget<S, M>>) {
+	// 	let id = widget.id();
+	// 	println!("adding child widget {:?} to {:?}", id, parent_id);
+	// 	let mut parent = self
+	// 		.widgets
+	// 		.remove(&parent_id)
+	// 		.expect("specified parent does not exist");
+	// 	let pod = Pod::new(Some(parent_id), widget);
+	// 	self.widgets.insert(id, pod);
+	// 	parent.children.insert(id);
+	// 	self.widgets.insert(parent_id, parent);
+	// }
 
 	// pub fn resolve_layout<'a>(&mut self, state: &'a S) {
 	// 	let layouts = vec![];

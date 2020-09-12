@@ -1,14 +1,12 @@
-use super::{ViewCtx, Widget};
+use super::{Id, ViewCtx};
 use crate::native_widgets::*;
 
-pub trait WidgetExt<S, M>: Widget<S, M> + Sized + 'static {
-	fn fix_width(self, ctx: &mut ViewCtx<S, M>, width: f64) -> SizedBox {
-		SizedBox::new(ctx, self).fix_width(width)
+impl Id {
+	pub fn fix_width<S, M>(self, ctx: &mut ViewCtx<S, M>, width: f64) -> Id {
+		SizedBox::new(self).fix_width(width).register(ctx)
 	}
 
-	fn fix_height(self, ctx: &mut ViewCtx<S, M>, height: f64) -> SizedBox {
-		SizedBox::new(ctx, self).fix_height(height)
+	pub fn fix_height<S, M>(self, ctx: &mut ViewCtx<S, M>, height: f64) -> Id {
+		SizedBox::new(self).fix_height(height).register(ctx)
 	}
 }
-
-impl<S, M, W: Widget<S, M> + 'static> WidgetExt<S, M> for W {}

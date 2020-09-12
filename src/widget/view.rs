@@ -1,29 +1,19 @@
-use super::{Id, PoolMessage, Widget};
-use std::collections::VecDeque;
+use super::{Id, Pool, Widget};
 
 pub struct ViewCtx<'a, S, M> {
-	pub pool_queue: VecDeque<PoolMessage<S, M>>,
-	last_id: &'a mut Id,
+	pool: &'a mut Pool<S, M>,
 }
 
 impl<'a, S, M> ViewCtx<'a, S, M> {
-	pub fn new(last_id: &'a mut Id) -> ViewCtx<'a, S, M> {
-		ViewCtx {
-			pool_queue: VecDeque::new(),
-			last_id,
-		}
+	pub fn new(pool: &'a mut Pool<S, M>) -> ViewCtx<'a, S, M> {
+		ViewCtx { pool }
 	}
 
-	pub fn acquire_id(&mut self) -> Id {
-		self.last_id.next()
+	pub fn register(&mut self, w: impl Widget<S, M> + 'static) -> Id {
+		self.pool.add_widget(w)
 	}
 
-	pub fn add_widget(&mut self, parent: Id, w: impl Widget<S, M> + 'static) -> Id {
-		let id = w.id();
-		self.pool_queue.push_back(PoolMessage::AddWidget {
-			parent,
-			widget: Box::new(w),
-		});
-		id
+	pub fn set_child(&mut self, parent: Id, child: Id) {
+		self.pool.set_widget_child(parent, child);
 	}
 }

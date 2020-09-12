@@ -30,11 +30,10 @@ Use env to get font info and get label size.
 pub struct Label<S> {
 	text: LabelText<S>,
 	size: Size,
-	id: Id,
 }
 
-impl<S> Label<S> {
-	pub fn new<M>(ctx: &mut ViewCtx<S, M>, text: impl Into<LabelText<S>>) -> Label<S> {
+impl<S: 'static> Label<S> {
+	pub fn new(text: impl Into<LabelText<S>>) -> Label<S> {
 		// let font = ab_glyph::FontArc::try_from_slice(include_bytes!("../painter/Ubuntu-M.ttf"))
 		// 	.expect("couldn't load font");
 		let size = Size {
@@ -42,18 +41,17 @@ impl<S> Label<S> {
 			height: 20.0,
 		};
 		Label {
-			id: ctx.acquire_id(),
 			size,
 			text: text.into(),
 		}
 	}
+
+	pub fn register<M>(self, ctx: &mut ViewCtx<S, M>) -> Id {
+		ctx.register(self)
+	}
 }
 
-impl<S, M: Clone> Widget<S, M> for Label<S> {
-	fn id(&self) -> Id {
-		self.id
-	}
-
+impl<S, M> Widget<S, M> for Label<S> {
 	fn size(&mut self, _ctx: &mut SizeCtx<S, M>) -> Size {
 		self.size
 	}
