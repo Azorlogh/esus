@@ -17,6 +17,7 @@ zerocopy = "0.3.0"
 kurbo = "0.6.2"
 wgpu_glyph = "0.9.0"
 ab_glyph = "0.2.5"
+pl-lens = "1.0.1"
 
 [target.'cfg(target_os = "windows")'.dependencies.winapi]
 version = "0.3.6"

@@ -6,6 +6,7 @@ use crate::{
 	widget::PaintCtx,
 };
 use crate::{Rect, Size};
+use pl_lens::Lens;
 use std::collections::{HashMap, VecDeque};
 
 pub enum PoolMessage<S, M> {
@@ -17,7 +18,7 @@ pub enum PoolMessage<S, M> {
 
 pub struct Pool<S, M> {
 	pub last_id: Id,
-	pub widgets: HashMap<Id, widget::Pod<S, M>>,
+	pub widgets: HashMap<Id, widget::Pod<S, Box<dyn std::any::Any>, M>>,
 	root: Option<Id>,
 	order: Vec<Id>,
 }
@@ -44,9 +45,13 @@ impl<S, M> Pool<S, M> {
 		self.root = Some(id);
 	}
 
-	pub fn add_widget(&mut self, widget: impl Widget<S, M> + 'static) -> Id {
+	pub fn add_widget<D>(
+		&mut self,
+		widget: impl Widget<Box<D>, M> + 'static,
+		lens: impl Lens<Source = S, Target = D> + 'static,
+	) -> Id {
 		let id = self.last_id.next();
-		let pod = Pod::new(None, Box::new(widget));
+		let pod = Pod::new(None, Box::new(widget), lens);
 		self.widgets.insert(id, pod);
 		id
 	}

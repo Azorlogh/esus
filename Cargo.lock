@@ -325,6 +325,7 @@ dependencies = [
  "futures",
  "kurbo",
  "log",
+ "pl-lens",
  "shaderc",
  "simple_logger",
  "wgpu",
@@ -1117,6 +1118,40 @@ name = "pkg-config"
 version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d36492546b6af1463394d46f0c834346f31548646f6ba10849802c9c9a27ac33"
+
+[[package]]
+name = "pl-lens"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17b6bb604680652ea1e2b279fb4f0b71e0ab5a2fe899937be84a74be86399dc7"
+dependencies = [
+ "pl-lens-derive",
+ "pl-lens-macros",
+ "proc-macro-hack",
+]
+
+[[package]]
+name = "pl-lens-derive"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71d316f1fe713ec058331a2b6c3451d5dbe1642822e2561d7d4bd1d6a51b8f79"
+dependencies = [
+ "proc-macro2 1.0.19",
+ "quote 1.0.7",
+ "syn",
+]
+
+[[package]]
+name = "pl-lens-macros"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78d4b95d73048cede685d94f96223e833196daf0cb9b8b3dc09538b263ff0e9c"
+dependencies = [
+ "proc-macro-hack",
+ "proc-macro2 1.0.19",
+ "quote 1.0.7",
+ "syn",
+]
 
 [[package]]
 name = "ppv-lite86"
