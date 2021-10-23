@@ -1,30 +1,22 @@
 use crate::{
-	widget::{Id, LayoutCtx, SizeCtx, ViewCtx, Widget},
+	state::State,
+	widget::{self, LayoutCtx, SizeCtx, Widget},
 	Layout, Size,
 };
 
-pub struct SizedBox {
-	child: Option<Id>,
+pub struct SizedBox<S: State> {
+	child: Option<widget::Pod<S>>,
 	width: Option<f64>,
 	height: Option<f64>,
 }
 
-impl SizedBox {
-	pub fn new(child: Id) -> SizedBox {
+impl<S: State> SizedBox<S> {
+	pub fn new(child: impl Widget<S> + 'static) -> SizedBox<S> {
 		let id = SizedBox {
-			child: Some(child),
+			child: Some(widget::Pod::new(child)),
 			width: None,
 			height: None,
 		};
-		id
-	}
-
-	pub fn register<'a, S, M>(self, ctx: &mut ViewCtx<'a, S, M>) -> Id {
-		let child = self.child;
-		let id = ctx.register(self);
-		if let Some(child) = child {
-			ctx.set_child(id, child);
-		}
 		id
 	}
 
@@ -39,10 +31,10 @@ impl SizedBox {
 	}
 }
 
-impl<S, M> Widget<S, M> for SizedBox {
-	fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
-		let mut size = if let Some(child) = self.child {
-			ctx.get_size(child, ctx.sc)
+impl<S: State> Widget<S> for SizedBox<S> {
+	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
+		let mut size = if let Some(child) = &mut self.child {
+			child.size(ctx)
 		} else {
 			ctx.sc.max
 		};
@@ -55,9 +47,9 @@ impl<S, M> Widget<S, M> for SizedBox {
 		size
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<S, M>) -> Layout {
-		if let Some(child) = self.child {
-			ctx.set_layout(child, ctx.suggestion);
+	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
+		if let Some(child) = &mut self.child {
+			child.layout(ctx);
 		}
 		ctx.suggestion
 	}

@@ -1,47 +1,62 @@
+use crate::{
+	event::{self, Event},
+	state::State,
+};
+
 use super::{EventCtx, Id, Layout, LayoutCtx, PaintCtx, Size, SizeCtx, Widget};
-use pl_lens::Lens;
 use std::collections::HashSet;
 
-pub struct Pod<S, D, M> {
-	pub inner: Box<dyn Widget<Box<D>, M>>,
-	pub parent: Option<Id>,
-	pub children: HashSet<Id>,
+pub struct Pod<S> {
+	pub inner: Box<dyn Widget<S>>,
 	pub is_active: bool,
 	pub layout: Option<Layout>,
-	pub lens: Box<dyn Lens<Source = S, Target = D>>,
 }
 
-impl<S, D, M> Pod<S, D, M> {
-	pub fn new(
-		parent: Option<Id>,
-		widget: Box<dyn Widget<Box<D>, M>>,
-		lens: impl Lens<Source = S, Target = D>,
-	) -> Pod<S, D, M> {
+impl<S> std::fmt::Debug for Pod<S> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.debug_struct("Pod")
+			.field("is_active", &self.is_active)
+			.field("layout", &self.layout)
+			.finish()
+	}
+}
+
+impl<S: State> Pod<S> {
+	pub fn new(widget: impl Widget<S> + 'static) -> Pod<S> {
 		Pod {
-			inner: widget,
-			parent,
+			inner: Box::new(widget),
 			is_active: false,
 			layout: None,
-			children: HashSet::new(),
-			lens,
 		}
 	}
 }
 
-impl<S, D, M> Pod<S, D, M> {
-	pub fn event(&mut self, ctx: &mut EventCtx<S, M>) {
-		self.inner.event(ctx)
+impl<S: State> Pod<S> {
+	pub fn event(&mut self, ctx: &mut EventCtx<S>) {
+		match ctx.event {
+			Event::MouseDown(_) => {
+				if let Some(layout) = self.layout {
+					if layout.rect.contains(ctx.devices.mouse.pos) {
+						self.inner.event(ctx);
+					}
+				}
+			}
+			_ => self.inner.event(ctx),
+		}
 	}
 
-	pub fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
+	pub fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
 		self.inner.size(ctx)
 	}
 
-	pub fn layout(&mut self, ctx: &mut LayoutCtx<S, M>) {
+	pub fn layout(&mut self, ctx: &mut LayoutCtx<S>) {
 		self.layout = Some(self.inner.layout(ctx));
 	}
 
 	pub fn paint(&mut self, ctx: &mut PaintCtx<S>) {
+		if let Some(layout) = self.layout {
+			ctx.layout = layout;
+		}
 		self.inner.paint(ctx)
 	}
 }

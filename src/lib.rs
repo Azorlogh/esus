@@ -10,6 +10,8 @@ pub mod instance;
 pub mod native_widgets;
 mod painter;
 mod render;
+pub mod state;
+pub use state::State;
 mod util;
 pub mod widget;
 

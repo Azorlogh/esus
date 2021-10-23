@@ -2,11 +2,12 @@ use crate::{
 	device::*,
 	event::*,
 	painter::Painter,
-	render::Renderer,
-	widget::{self, Id, ViewCtx},
+	render::{self, Renderer},
+	state::State,
+	widget::{self, Widget},
 	Size,
 };
-use kurbo::Point;
+use kurbo::{Point, Rect};
 use std::os::raw::c_void;
 // use winapi::shared::windef::HWND;
 // use winit::platform::windows::WindowBuilderExtWindows
@@ -17,24 +18,24 @@ use winit::{
 	window::{Window, WindowBuilder},
 };
 
-pub struct Builder<S, M> {
+pub struct Builder<S: State> {
 	parent_window: Option<*mut c_void>,
 	title: String,
 	size: PhysicalSize<u32>,
 	state: Option<S>,
-	updater: Option<Box<dyn Fn(&mut S, M)>>,
-	view: widget::Pool<S, M>,
+	updater: Option<Box<dyn Fn(&mut S, S::Message)>>,
+	view: Option<widget::Pod<S>>,
 }
 
-impl<S, M> Builder<S, M> {
-	pub fn new() -> Builder<S, M> {
+impl<S: State> Builder<S> {
+	pub fn new() -> Builder<S> {
 		Builder {
 			parent_window: None,
 			title: "App Name".to_string(),
 			size: (100, 100).into(),
 			state: None,
 			updater: None,
-			view: widget::Pool::new(),
+			view: None,
 		}
 	}
 
@@ -48,18 +49,14 @@ impl<S, M> Builder<S, M> {
 		self
 	}
 
-	pub fn with_updater(mut self, updater: impl Fn(&mut S, M) + 'static) -> Self {
+	pub fn with_updater(mut self, updater: impl Fn(&mut S, S::Message) + 'static) -> Self {
 		self.updater = Some(Box::new(updater));
 		self
 	}
 
-	pub fn with_view(mut self, builder: impl Fn(&mut ViewCtx<S, M>) -> Id + 'static) -> Self {
+	pub fn with_view(mut self, builder: impl Widget<S> + 'static) -> Self {
 		{
-			let mut ctx = ViewCtx::new(&mut self.view);
-
-			let root = builder(&mut ctx);
-
-			self.view.set_root_widget(root);
+			self.view = Some(widget::Pod::new(builder));
 		}
 		self
 	}
@@ -74,9 +71,11 @@ impl<S, M> Builder<S, M> {
 		self
 	}
 
-	pub fn build(self) -> Instance<S, M> {
+	pub fn build(self) -> Instance<S> {
 		let event_loop = EventLoop::new();
-		let window_builder = WindowBuilder::new().with_title(self.title);
+		let window_builder = WindowBuilder::new()
+			.with_title(self.title)
+			.with_resizable(false);
 		// if let Some(handle) = self.parent_window {
 		// 	window_builder = window_builder.with_parent_window(handle as HWND);
 		// }
@@ -84,17 +83,26 @@ impl<S, M> Builder<S, M> {
 		let renderer = futures::executor::block_on(Renderer::new(&window));
 		let painter = Painter::new(&renderer.device);
 
-		let state = self.state.expect("no state was provided");
-		let mut view = self.view;
+		let mut state = self.state.expect("no state was provided");
+		let mut view = self.view.unwrap();
 
 		let size = window.inner_size();
-		view.resolve_layout(
-			&state,
-			Size {
-				width: size.width as f64,
-				height: size.height as f64,
-			},
-		);
+		{
+			let mut ctx = widget::LayoutCtx::new(
+				&mut state,
+				crate::data::Layout {
+					rect: Rect::from_origin_size(
+						Point::ORIGIN,
+						Size {
+							width: size.width as f64,
+							height: size.height as f64,
+						},
+					),
+					depth: 0.0,
+				},
+			);
+			view.layout(&mut ctx);
+		}
 
 		Instance {
 			event_loop,
@@ -113,19 +121,19 @@ impl<S, M> Builder<S, M> {
 ///
 
 #[allow(unused)]
-pub struct Instance<S, M> {
+pub struct Instance<S: State> {
 	event_loop: EventLoop<()>,
 	window: Window,
 	renderer: Renderer,
 	painter: Painter,
 	state: S,
-	updater: Box<dyn Fn(&mut S, M)>,
-	view: widget::Pool<S, M>,
+	updater: Box<dyn Fn(&mut S, S::Message)>,
+	view: widget::Pod<S>,
 	devices: DeviceStates,
 	dead: bool,
 }
 
-impl<D, M> Instance<D, M> {
+impl<S: State> Instance<S> {
 	pub fn is_dead(&self) -> bool {
 		self.dead
 	}
@@ -160,7 +168,26 @@ impl<D, M> Instance<D, M> {
 					renderer.resize(size);
 				}
 				wevent::Event::RedrawRequested(_) => {
-					view.paint(renderer, painter, state);
+					// pub struct PaintCtx<'a, 'r, S> {
+					// 	pub render_ctx: &'a mut RenderCtx<'r>,
+					// 	pub painter: &'a mut Painter,
+					// 	pub state: &'a S,
+					// 	pub layout: Layout,
+					// }
+					let mut render_ctx = render::next_frame(
+						&mut renderer.device,
+						&mut renderer.swapchain,
+						renderer.size,
+					);
+					let mut ctx = widget::PaintCtx {
+						render_ctx: &mut render_ctx,
+						painter,
+						state,
+						layout: view.layout.unwrap(),
+					};
+					view.paint(&mut ctx);
+
+					render::finish_frame(&mut renderer.queue, render_ctx)
 				}
 				wevent::Event::WindowEvent { event, .. } => match event {
 					wevent::WindowEvent::MouseInput { state, button, .. } => match state {
@@ -191,7 +218,8 @@ impl<D, M> Instance<D, M> {
 
 			let mut messages = VecDeque::new();
 			for event in events {
-				view.event(event, state, devices, &mut messages);
+				let mut ctx = widget::EventCtx::new(&event, state, devices, &mut messages);
+				view.event(&mut ctx);
 			}
 			if messages.len() > 0 {
 				window.request_redraw();

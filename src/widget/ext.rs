@@ -1,12 +1,12 @@
-use super::{Id, ViewCtx};
-use crate::native_widgets::*;
+use super::Widget;
+use crate::{native_widgets::*, state::State};
 
-impl Id {
-	pub fn fix_width<S, M>(self, ctx: &mut ViewCtx<S, M>, width: f64) -> Id {
-		SizedBox::new(self).fix_width(width).register(ctx)
-	}
+// impl<S: State, W: Widget<S>> W {
+// 	pub fn fix_width(self, width: f64) -> W {
+// 		SizedBox::new(self).fix_width(width)
+// 	}
 
-	pub fn fix_height<S, M>(self, ctx: &mut ViewCtx<S, M>, height: f64) -> Id {
-		SizedBox::new(self).fix_height(height).register(ctx)
-	}
-}
+// 	pub fn fix_height(self, height: f64) -> W {
+// 		SizedBox::new(self).fix_height(height)
+// 	}
+// }

@@ -1,4 +1,4 @@
-use crate::widget::prelude::*;
+use crate::{state::State, widget::prelude::*};
 
 pub struct Button<M> {
 	msg: Option<M>,
@@ -13,18 +13,14 @@ impl<M: Clone + 'static> Button<M> {
 		self.msg = Some(msg);
 		self
 	}
-
-	pub fn register<'a, S>(self, ctx: &mut ViewCtx<'a, S, M>) -> Id {
-		ctx.register(self)
-	}
 }
 
-impl<S, M: Clone> Widget<S, M> for Button<M> {
-	fn size(&mut self, _ctx: &mut SizeCtx<S, M>) -> Size {
+impl<S: State> Widget<S> for Button<S::Message> {
+	fn size(&mut self, _ctx: &mut SizeCtx<S>) -> Size {
 		Size::new(100.0, 20.0)
 	}
 
-	fn event(&mut self, ctx: &mut EventCtx<S, M>) {
+	fn event(&mut self, ctx: &mut EventCtx<S>) {
 		match ctx.event {
 			Event::MouseDown(_) => {
 				if let Some(msg) = &self.msg {

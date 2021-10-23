@@ -1,4 +1,7 @@
-use crate::widget::{Id, ViewCtx, Widget};
+use crate::{
+	state::State,
+	widget::{Id, Widget},
+};
 
 pub struct Empty;
 
@@ -6,10 +9,6 @@ impl Empty {
 	pub fn new() -> Empty {
 		Empty
 	}
-
-	pub fn register<'a, S, M>(self, ctx: &mut ViewCtx<'a, S, M>) -> Id {
-		ctx.register(self)
-	}
 }
 
-impl<S, M> Widget<S, M> for Empty {}
+impl<S: State> Widget<S> for Empty {}

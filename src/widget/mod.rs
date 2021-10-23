@@ -1,10 +1,10 @@
-use crate::{Layout, Size};
+use crate::{state::State, Layout, Size};
 
 pub mod id;
 pub use id::Id;
 
-pub mod view;
-pub use view::ViewCtx;
+// pub mod view;
+// pub use view::ViewCtx;
 
 pub mod event;
 pub use event::EventCtx;
@@ -21,22 +21,19 @@ pub use layout::LayoutCtx;
 pub mod pod;
 pub use pod::Pod;
 
-pub mod pool;
-pub use pool::{Pool, PoolMessage};
-
 mod ext;
 // pub use ext::WidgetExt;
 
-pub trait Widget<S, M> {
+pub trait Widget<S: State> {
 	// for event handling
-	fn event(&mut self, _ctx: &mut EventCtx<S, M>) {}
+	fn event(&mut self, _ctx: &mut EventCtx<S>) {}
 
-	fn size(&mut self, ctx: &mut SizeCtx<S, M>) -> Size {
+	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
 		ctx.sc.max
 	}
 
 	// to inform the instance of this widget's Layout
-	fn layout(&mut self, ctx: &mut LayoutCtx<S, M>) -> Layout {
+	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
 		ctx.suggestion
 	}
 
@@ -47,7 +44,7 @@ pub trait Widget<S, M> {
 pub mod prelude {
 	pub use crate::{
 		event::Event,
-		widget::{self, EventCtx, Id, LayoutCtx, PaintCtx, SizeCtx, ViewCtx, Widget},
+		widget::{self, EventCtx, Id, LayoutCtx, PaintCtx, SizeCtx, Widget},
 		Layout, Rect, Size,
 	};
 }

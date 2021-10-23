@@ -1,4 +1,4 @@
-use crate::widget::prelude::*;
+use crate::{state::State, widget::prelude::*};
 
 pub enum LabelText<S> {
 	/// Specific text
@@ -45,18 +45,14 @@ impl<S: 'static> Label<S> {
 			text: text.into(),
 		}
 	}
-
-	pub fn register<M>(self, ctx: &mut ViewCtx<S, M>) -> Id {
-		ctx.register(self)
-	}
 }
 
-impl<S, M> Widget<S, M> for Label<S> {
-	fn size(&mut self, _ctx: &mut SizeCtx<S, M>) -> Size {
+impl<S: State> Widget<S> for Label<S> {
+	fn size(&mut self, _ctx: &mut SizeCtx<S>) -> Size {
 		self.size
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<S, M>) -> Layout {
+	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
 		ctx.suggestion
 	}
 

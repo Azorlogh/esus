@@ -1,15 +1,15 @@
-use super::{Id, Pool, Widget};
+use super::{Id, Widget};
 
-pub struct ViewCtx<'a, S, M> {
-	pool: &'a mut Pool<S, M>,
+pub struct ViewCtx<'a, S> {
+	pool: &'a mut Pool<S>,
 }
 
-impl<'a, S, M> ViewCtx<'a, S, M> {
-	pub fn new(pool: &'a mut Pool<S, M>) -> ViewCtx<'a, S, M> {
+impl<'a, S: State> ViewCtx<'a, S> {
+	pub fn new(pool: &'a mut Pool<S>) -> ViewCtx<'a, S> {
 		ViewCtx { pool }
 	}
 
-	pub fn register(&mut self, w: impl Widget<S, M> + 'static) -> Id {
+	pub fn register(&mut self, w: impl Widget<S> + 'static) -> Id {
 		self.pool.add_widget(w)
 	}
 
