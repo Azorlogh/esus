@@ -33,5 +33,6 @@ impl<S: State> Widget<S> for Button<S::Message> {
 
 	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
 		ctx.rect(widget::paint::DrawMode::Fill, ctx.layout().rect);
+		// ctx.stroke(rect(10, 10))
 	}
 }

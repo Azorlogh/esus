@@ -1,5 +1,8 @@
+use std::borrow::Cow;
+
 use super::RenderCtx;
-use crate::util;
+use crate::{render::Renderer, util};
+use wgpu::util::DeviceExt;
 use zerocopy::AsBytes as _;
 
 const UNIFORM_SIZE: wgpu::BufferAddress = 4 * std::mem::size_of::<f32>() as wgpu::BufferAddress;
@@ -16,100 +19,110 @@ pub struct Rect {
 }
 
 impl Rect {
-	pub fn new(device: &wgpu::Device) -> Rect {
-		let vs_module = device.create_shader_module(&util::compile_shader(
-			include_str!("rect.vert"),
-			shaderc::ShaderKind::Vertex,
-		));
-		let fs_module = device.create_shader_module(&util::compile_shader(
-			include_str!("rect.frag"),
-			shaderc::ShaderKind::Fragment,
-		));
+	pub fn new(renderer: &Renderer) -> Rect {
+		let vs_module = renderer
+			.device
+			.create_shader_module(&wgpu::ShaderModuleDescriptor {
+				label: None,
+				source: wgpu::ShaderSource::SpirV(Cow::Owned(util::compile_shader(
+					include_str!("rect.vert"),
+					shaderc::ShaderKind::Vertex,
+				))),
+			});
+		let fs_module = renderer
+			.device
+			.create_shader_module(&wgpu::ShaderModuleDescriptor {
+				label: None,
+				source: wgpu::ShaderSource::SpirV(Cow::Owned(util::compile_shader(
+					include_str!("rect.frag"),
+					shaderc::ShaderKind::Fragment,
+				))),
+			});
 
-		let u_buf = device.create_buffer_with_data(
-			[10.0f32, 10.0, 100.0, 20.0].as_bytes(),
-			wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM,
-		);
+		let u_buf = renderer
+			.device
+			.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+				label: None,
+				contents: [10.0f32, 10.0, 100.0, 20.0].as_bytes(),
+				usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::UNIFORM,
+			});
 
-		let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-			bindings: &[wgpu::BindGroupLayoutEntry {
-				binding: 0,
-				visibility: wgpu::ShaderStage::FRAGMENT,
-				ty: wgpu::BindingType::UniformBuffer { dynamic: false },
-			}],
-			label: None,
-		});
-
-		let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-			layout: &bind_group_layout,
-			bindings: &[wgpu::Binding {
-				binding: 0,
-				resource: wgpu::BindingResource::Buffer {
-					buffer: &u_buf,
-					range: 0..UNIFORM_SIZE,
-				},
-			}],
-			label: None,
-		});
-
-		let vertex_buf = device.create_buffer_with_data(
-			[-1.0f32, -1.0, 3.0, -1.0, -1.0, 3.0].as_bytes(),
-			wgpu::BufferUsage::VERTEX,
-		);
-
-		let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-			bind_group_layouts: &[&bind_group_layout],
-		});
-
-		let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-			layout: &pipeline_layout,
-			vertex_stage: wgpu::ProgrammableStageDescriptor {
-				module: &vs_module,
-				entry_point: "main",
-			},
-			fragment_stage: Some(wgpu::ProgrammableStageDescriptor {
-				module: &fs_module,
-				entry_point: "main",
-			}),
-			rasterization_state: Some(wgpu::RasterizationStateDescriptor {
-				front_face: wgpu::FrontFace::Ccw,
-				cull_mode: wgpu::CullMode::None,
-				depth_bias: 0,
-				depth_bias_slope_scale: 0.0,
-				depth_bias_clamp: 0.0,
-			}),
-			primitive_topology: wgpu::PrimitiveTopology::TriangleList,
-			color_states: &[wgpu::ColorStateDescriptor {
-				format: wgpu::TextureFormat::Bgra8UnormSrgb,
-				color_blend: wgpu::BlendDescriptor {
-					src_factor: wgpu::BlendFactor::SrcAlpha,
-					dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
-					operation: wgpu::BlendOperation::Add,
-				},
-				alpha_blend: wgpu::BlendDescriptor {
-					src_factor: wgpu::BlendFactor::One,
-					dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
-					operation: wgpu::BlendOperation::Add,
-				},
-				write_mask: wgpu::ColorWrite::ALL,
-			}],
-			depth_stencil_state: None,
-			vertex_state: wgpu::VertexStateDescriptor {
-				index_format: wgpu::IndexFormat::Uint16,
-				vertex_buffers: &[wgpu::VertexBufferDescriptor {
-					stride: VERTEX_SIZE,
-					step_mode: wgpu::InputStepMode::Vertex,
-					attributes: &[wgpu::VertexAttributeDescriptor {
-						format: wgpu::VertexFormat::Float2,
-						offset: 0,
-						shader_location: 0,
+		let bind_group_layout =
+			renderer
+				.device
+				.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+					entries: &[wgpu::BindGroupLayoutEntry {
+						binding: 0,
+						visibility: wgpu::ShaderStages::VERTEX,
+						ty: wgpu::BindingType::Buffer {
+							ty: wgpu::BufferBindingType::Uniform,
+							has_dynamic_offset: false,
+							min_binding_size: None,
+						},
+						count: None,
 					}],
+					label: None,
+				});
+
+		let bind_group = renderer
+			.device
+			.create_bind_group(&wgpu::BindGroupDescriptor {
+				layout: &bind_group_layout,
+				entries: &[wgpu::BindGroupEntry {
+					binding: 0,
+					resource: u_buf.as_entire_binding(),
 				}],
-			},
-			sample_count: 1,
-			sample_mask: !0,
-			alpha_to_coverage_enabled: false,
-		});
+				label: None,
+			});
+
+		let vertex_buf = renderer
+			.device
+			.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+				label: None,
+				contents: [0.0f32, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0].as_bytes(),
+				usage: wgpu::BufferUsages::VERTEX,
+			});
+
+		let pipeline_layout =
+			renderer
+				.device
+				.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+					label: None,
+					bind_group_layouts: &[&bind_group_layout],
+					push_constant_ranges: &[],
+				});
+
+		let pipeline = renderer
+			.device
+			.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+				label: None,
+				layout: Some(&pipeline_layout),
+				vertex: wgpu::VertexState {
+					module: &vs_module,
+					entry_point: "main",
+					buffers: &[wgpu::VertexBufferLayout {
+						array_stride: VERTEX_SIZE,
+						step_mode: wgpu::VertexStepMode::Vertex,
+						attributes: &[wgpu::VertexAttribute {
+							format: wgpu::VertexFormat::Float32x2,
+							offset: 0,
+							shader_location: 0,
+						}],
+					}],
+				},
+				fragment: Some(wgpu::FragmentState {
+					module: &fs_module,
+					entry_point: "main",
+					targets: &[renderer.surface_cfg.format.into()],
+				}),
+				primitive: wgpu::PrimitiveState {
+					cull_mode: None,
+					topology: wgpu::PrimitiveTopology::TriangleStrip,
+					..Default::default()
+				},
+				depth_stencil: None,
+				multisample: wgpu::MultisampleState::default(),
+			});
 
 		Rect {
 			vs_module,
@@ -121,13 +134,20 @@ impl Rect {
 		}
 	}
 
-	pub fn fill(&self, render_ctx: &mut RenderCtx, b0: (f32, f32), b1: (f32, f32)) {
+	pub fn fill(&self, render_ctx: &mut RenderCtx, mut b0: (f32, f32), mut b1: (f32, f32)) {
+		b0.0 = b0.0 / render_ctx.size.width as f32 * 2.0 - 1.0;
+		b0.1 = 1.0 - b0.1 / render_ctx.size.width as f32 * 2.0;
+		b1.0 = b1.0 / render_ctx.size.width as f32 * 2.0 - 1.0;
+		b1.1 = 1.0 - b1.1 / render_ctx.size.width as f32 * 2.0;
 		// set uniforms
 		{
-			let buf = render_ctx.device.create_buffer_with_data(
-				[b0.0, b0.1, b1.0, b1.1].as_bytes(),
-				wgpu::BufferUsage::COPY_SRC,
-			);
+			let buf = render_ctx
+				.device
+				.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+					label: None,
+					contents: [b0.0, b0.1, b1.0, b1.1].as_bytes(),
+					usage: wgpu::BufferUsages::COPY_SRC,
+				});
 
 			render_ctx
 				.encoder
@@ -137,16 +157,13 @@ impl Rect {
 		let mut rpass = render_ctx
 			.encoder
 			.begin_render_pass(&wgpu::RenderPassDescriptor {
-				color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
-					attachment: &render_ctx.frame.view,
+				label: None,
+				color_attachments: &[wgpu::RenderPassColorAttachment {
+					view: &render_ctx.view,
 					resolve_target: None,
-					load_op: wgpu::LoadOp::Load,
-					store_op: wgpu::StoreOp::Store,
-					clear_color: wgpu::Color {
-						r: 0.1,
-						g: 1.0,
-						b: 0.3,
-						a: 1.0,
+					ops: wgpu::Operations {
+						load: wgpu::LoadOp::Load,
+						store: true,
 					},
 				}],
 				depth_stencil_attachment: None,
@@ -154,7 +171,7 @@ impl Rect {
 
 		rpass.set_pipeline(&self.pipeline);
 		rpass.set_bind_group(0, &self.bind_group, &[]);
-		rpass.set_vertex_buffer(0, &self.vertex_buf, 0, 0);
-		rpass.draw(0..3, 0..1);
+		rpass.set_vertex_buffer(0, self.vertex_buf.slice(..));
+		rpass.draw(0..4, 0..1);
 	}
 }

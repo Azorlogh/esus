@@ -1,5 +1,4 @@
-use crate::widget;
-use crate::{Size, SizeConstraints};
+use crate::SizeConstraints;
 
 pub struct SizeCtx<'a, S> {
 	pub state: &'a S,

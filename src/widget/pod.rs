@@ -1,10 +1,6 @@
-use crate::{
-	event::{self, Event},
-	state::State,
-};
+use crate::{event::Event, state::State};
 
-use super::{EventCtx, Id, Layout, LayoutCtx, PaintCtx, Size, SizeCtx, Widget};
-use std::collections::HashSet;
+use super::{EventCtx, Layout, LayoutCtx, PaintCtx, Size, SizeCtx, Widget};
 
 pub struct Pod<S> {
 	pub inner: Box<dyn Widget<S>>,

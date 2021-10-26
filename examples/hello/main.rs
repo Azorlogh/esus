@@ -1,6 +1,6 @@
 use esus::{
 	instance,
-	native_widgets::{Button, Flex, Label, LabelText},
+	native_widgets::{Button, Empty, Flex, Label, LabelText},
 };
 
 #[derive(Debug)]
@@ -36,7 +36,10 @@ fn main() {
 			// .fix_height(ctx, 100.0);
 			let b1 = Button::new().on_click(Message::Decrement);
 			Flex::row().with_child(b0).with_child(label).with_child(b1)
+
 			// Button::new().on_click(Message::Increment)
+
+			// Empty::new()
 		})
 		.build();
 

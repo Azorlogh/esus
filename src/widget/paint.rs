@@ -24,17 +24,24 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 	}
 
 	pub fn print(&mut self, rect: Rect, text: &str) {
+		println!("drawing text with bounds {:?}", rect);
 		let section = wgpu_glyph::Section::default()
 			.add_text(
 				wgpu_glyph::Text::new(text)
 					.with_color([1.0, 1.0, 1.0, 1.0])
 					.with_scale(12.0),
 			)
-			.with_screen_position((rect.x0 as f32, rect.y0 as f32))
-			.with_bounds((rect.x1 as f32, rect.y1 as f32))
+			.with_screen_position((
+				(rect.x0 as f32 + rect.x1 as f32) / 2.0,
+				(rect.y0 as f32 + rect.y1 as f32) / 2.0,
+			))
+			.with_bounds((
+				rect.x1 as f32 - rect.x0 as f32,
+				rect.y1 as f32 - rect.y0 as f32,
+			))
 			.with_layout(
 				wgpu_glyph::Layout::default()
-					.h_align(wgpu_glyph::HorizontalAlign::Left)
+					.h_align(wgpu_glyph::HorizontalAlign::Center)
 					.v_align(wgpu_glyph::VerticalAlign::Center),
 			);
 
@@ -43,8 +50,9 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 			.glyph_brush
 			.draw_queued(
 				&self.render_ctx.device,
+				&mut self.render_ctx.staging_belt,
 				&mut self.render_ctx.encoder,
-				&self.render_ctx.frame.view,
+				&self.render_ctx.view,
 				self.render_ctx.size.width,
 				self.render_ctx.size.height,
 			)

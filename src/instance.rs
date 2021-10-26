@@ -14,7 +14,7 @@ use std::os::raw::c_void;
 use winit::{
 	dpi::PhysicalSize,
 	event_loop::{ControlFlow, EventLoop},
-	platform::desktop::EventLoopExtDesktop,
+	platform::run_return::EventLoopExtRunReturn,
 	window::{Window, WindowBuilder},
 };
 
@@ -81,7 +81,7 @@ impl<S: State> Builder<S> {
 		// }
 		let window = window_builder.build(&event_loop).unwrap();
 		let renderer = futures::executor::block_on(Renderer::new(&window));
-		let painter = Painter::new(&renderer.device);
+		let painter = Painter::new(&renderer);
 
 		let mut state = self.state.expect("no state was provided");
 		let mut view = self.view.unwrap();
@@ -167,6 +167,9 @@ impl<S: State> Instance<S> {
 				} => {
 					renderer.resize(size);
 				}
+				wevent::Event::MainEventsCleared => {
+					window.request_redraw();
+				}
 				wevent::Event::RedrawRequested(_) => {
 					// pub struct PaintCtx<'a, 'r, S> {
 					// 	pub render_ctx: &'a mut RenderCtx<'r>,
@@ -176,8 +179,11 @@ impl<S: State> Instance<S> {
 					// }
 					let mut render_ctx = render::next_frame(
 						&mut renderer.device,
-						&mut renderer.swapchain,
+						&mut renderer.surface,
 						renderer.size,
+						&mut renderer.staging_belt,
+						&mut renderer.local_pool,
+						&mut renderer.local_spawner,
 					);
 					let mut ctx = widget::PaintCtx {
 						render_ctx: &mut render_ctx,

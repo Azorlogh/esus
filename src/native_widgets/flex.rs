@@ -29,7 +29,7 @@ impl<S: State> Flex<S> {
 		}
 	}
 
-	pub fn with_child(mut self, c: impl Widget<S> + 'static) -> Flex<S> {
+	pub fn with_child(self, c: impl Widget<S> + 'static) -> Flex<S> {
 		self.with_flex_child(c, 0.0)
 	}
 

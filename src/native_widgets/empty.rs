@@ -1,7 +1,4 @@
-use crate::{
-	state::State,
-	widget::{Id, Widget},
-};
+use crate::{state::State, widget::Widget};
 
 pub struct Empty;
 
