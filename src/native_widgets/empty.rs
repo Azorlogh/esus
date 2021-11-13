@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 
 use crate::{state::State, widget::Widget};
 
+#[derive(Debug)]
 pub struct Empty<S> {
 	_phandom: PhantomData<S>,
 }

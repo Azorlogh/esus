@@ -10,6 +10,7 @@ pub struct ChildWidget<S> {
 	flex: f32,
 }
 
+#[derive(Debug)]
 pub struct Flex<S> {
 	axis: Axis,
 	children: Vec<ChildWidget<S>>,
@@ -46,7 +47,23 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 	type S = S;
 
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
-		ctx.sc.max
+		let mut minor_size = 0.0;
+		for child in &mut self.children {
+			if child.flex == 0.0 {
+				let mut ctx = SizeCtx::new(
+					ctx.state,
+					SizeConstraints {
+						min: Size::new(0.0, 0.0),
+						max: ctx.sc.max,
+					},
+				);
+				let minor = self.axis.minor(child.widget.size(&mut ctx));
+				if minor > minor_size {
+					minor_size = minor;
+				}
+			}
+		}
+		self.axis.with_minor(ctx.sc.max, minor_size)
 	}
 
 	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
@@ -81,7 +98,8 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 				ctx.state,
 				Layout {
 					rect: Rect {
-						origin: self.axis.with_major(Point::origin(), curr_major),
+						origin: self.axis.with_major(Point::origin(), curr_major)
+							+ suggestion.rect.origin.to_vector(),
 						size,
 					},
 					depth: 0.0,
@@ -90,8 +108,6 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 			child.widget.layout(&mut ctx);
 			curr_major += self.axis.major(size);
 		}
-
-		println!("{:?}", self.children);
 
 		log::warn!("flex layout done!");
 		suggestion

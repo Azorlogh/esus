@@ -59,7 +59,7 @@ impl Renderer {
 		surface.configure(&device, &surface_cfg);
 
 		let staging_belt = wgpu::util::StagingBelt::new(1024);
-		let mut local_pool = futures::executor::LocalPool::new();
+		let local_pool = futures::executor::LocalPool::new();
 		let local_spawner = local_pool.spawner();
 
 		Renderer {

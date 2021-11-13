@@ -10,7 +10,6 @@ use lyon::{
 	path::Path,
 };
 use wgpu::util::DeviceExt;
-use zerocopy::AsBytes as _;
 
 const UNIFORM_SIZE: wgpu::BufferAddress = 16 * std::mem::size_of::<f32>() as wgpu::BufferAddress;
 const VERTEX_SIZE: wgpu::BufferAddress = 2 * std::mem::size_of::<f32>() as wgpu::BufferAddress;

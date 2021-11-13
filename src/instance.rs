@@ -145,6 +145,7 @@ impl<S: State> Instance<S> {
 		let window = &mut self.window;
 		self.event_loop.run_return(|event, _, control_flow| {
 			*control_flow = ControlFlow::Exit;
+
 			let mut events = VecDeque::new();
 			match event {
 				wevent::Event::WindowEvent {
@@ -160,16 +161,8 @@ impl<S: State> Instance<S> {
 				} => {
 					renderer.resize(size);
 				}
-				wevent::Event::MainEventsCleared => {
-					window.request_redraw();
-				}
+				wevent::Event::MainEventsCleared => {}
 				wevent::Event::RedrawRequested(_) => {
-					// pub struct PaintCtx<'a, 'r, S> {
-					// 	pub render_ctx: &'a mut RenderCtx<'r>,
-					// 	pub painter: &'a mut Painter,
-					// 	pub state: &'a S,
-					// 	pub layout: Layout,
-					// }
 					let mut render_ctx = render::next_frame(
 						&mut renderer.device,
 						&mut renderer.surface,

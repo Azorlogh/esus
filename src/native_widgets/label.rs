@@ -7,6 +7,16 @@ pub enum LabelText<S> {
 	/// value is used as the text for the label.
 	Dynamic(Box<dyn Fn(&S) -> String>),
 }
+
+impl<S> std::fmt::Debug for LabelText<S> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			LabelText::Specific(s) => write!(f, "\"{}\"", s),
+			LabelText::Dynamic(_) => write!(f, "LabelText::Dynamic"),
+		}
+	}
+}
+
 impl<S> From<&str> for LabelText<S> {
 	fn from(src: &str) -> LabelText<S> {
 		LabelText::Specific(src.to_string())
@@ -27,6 +37,7 @@ TODO when env is implemented:
 Use env to get font info and get label size.
 */
 
+#[derive(Debug)]
 pub struct Label<S> {
 	text: LabelText<S>,
 	size: Size,

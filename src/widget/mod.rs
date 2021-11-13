@@ -24,7 +24,7 @@ pub use pod::Pod;
 mod ext;
 pub use ext::WidgetExt;
 
-pub trait Widget {
+pub trait Widget: std::fmt::Debug {
 	type S: State;
 	// for event handling
 	fn event(&mut self, _ctx: &mut EventCtx<Self::S>) {}

@@ -2,20 +2,21 @@ use crate::{event::Event, state::State, Size};
 
 use super::{EventCtx, Layout, LayoutCtx, PaintCtx, SizeCtx, Widget};
 
+#[derive(Debug)]
 pub struct Pod<S> {
 	pub inner: Box<dyn Widget<S = S>>,
 	pub is_active: bool,
 	pub layout: Option<Layout>,
 }
 
-impl<S> std::fmt::Debug for Pod<S> {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.debug_struct("Pod")
-			.field("is_active", &self.is_active)
-			.field("layout", &self.layout)
-			.finish()
-	}
-}
+// impl<S> std::fmt::Debug for Pod<S> {
+// 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+// 		f.debug_struct("Pod")
+// 			.field("is_active", &self.is_active)
+// 			.field("layout", &self.layout)
+// 			.finish()
+// 	}
+// }
 
 impl<S: State> Pod<S> {
 	pub fn new(widget: impl Widget<S = S> + 'static) -> Pod<S> {
@@ -52,7 +53,7 @@ impl<S: State> Pod<S> {
 	pub fn paint(&mut self, ctx: &mut PaintCtx<S>) {
 		if let Some(layout) = self.layout {
 			ctx.layout = layout;
+			self.inner.paint(ctx)
 		}
-		self.inner.paint(ctx)
 	}
 }

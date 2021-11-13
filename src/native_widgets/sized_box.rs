@@ -4,6 +4,7 @@ use crate::{
 	Layout, Size,
 };
 
+#[derive(Debug)]
 pub struct SizedBox<S: State> {
 	child: Option<widget::Pod<S>>,
 	width: Option<f32>,

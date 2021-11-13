@@ -1,4 +1,3 @@
-use lyon::lyon_tessellation::{FillOptions, FillTessellator, VertexBuffers};
 use lyon::path::Path;
 
 use crate::painter::Painter;
@@ -18,14 +17,6 @@ pub enum DrawMode {
 }
 
 impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
-	pub fn rect(&mut self, _: DrawMode, rect: Rect) {
-		// self.painter.rect.fill(
-		// 	&mut self.render_ctx,
-		// 	(rect.x0 as f32, rect.y0 as f32),
-		// 	(rect.x1 as f32, rect.y1 as f32),
-		// );
-	}
-
 	pub fn fill(&mut self, path: &Path, color: Color) {
 		self.painter.brush.set_color(self.render_ctx, color);
 		self.painter.brush.fill(self.render_ctx, path);

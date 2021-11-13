@@ -2,16 +2,26 @@ use lyon::path::{builder::BorderRadii, traits::PathBuilder, Winding};
 
 use crate::{state::State, widget::prelude::*, Color};
 
+#[derive(Debug)]
 pub struct Button<S: State> {
+	color: Color,
 	msg: Option<S::Message>,
 }
 
 impl<S: State> Button<S> {
-	pub fn new() -> Button<S> {
-		Button { msg: None }
+	pub fn new() -> Self {
+		Self {
+			color: Color([0.35, 0.3, 0.05, 1.0]),
+			msg: None,
+		}
 	}
 
-	pub fn on_click(mut self, msg: S::Message) -> Button<S> {
+	pub fn with_color(mut self, color: Color) -> Self {
+		self.color = color;
+		self
+	}
+
+	pub fn on_click(mut self, msg: S::Message) -> Self {
 		self.msg = Some(msg);
 		self
 	}
@@ -44,6 +54,6 @@ impl<S: State> Widget for Button<S> {
 		);
 		let path = builder.build();
 
-		ctx.fill(&path, Color([0.35, 0.3, 0.05, 1.0]));
+		ctx.fill(&path, self.color);
 	}
 }

@@ -1,8 +1,5 @@
-use crate::{
-	render::{RenderCtx, Renderer, Vertex},
-	Color,
-};
-use lyon::path::Path;
+use crate::render::{RenderCtx, Renderer};
+
 use wgpu_glyph::{GlyphBrush, GlyphBrushBuilder};
 
 mod rect;
