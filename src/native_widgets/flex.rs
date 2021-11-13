@@ -29,11 +29,11 @@ impl<S: State> Flex<S> {
 		}
 	}
 
-	pub fn with_child(self, c: impl Widget<S> + 'static) -> Flex<S> {
+	pub fn with_child(self, c: impl Widget<S = S> + 'static) -> Flex<S> {
 		self.with_flex_child(c, 0.0)
 	}
 
-	pub fn with_flex_child(mut self, c: impl Widget<S> + 'static, flex: f32) -> Flex<S> {
+	pub fn with_flex_child(mut self, c: impl Widget<S = S> + 'static, flex: f32) -> Flex<S> {
 		self.children.push(ChildWidget {
 			widget: widget::Pod::new(c),
 			flex,
@@ -42,7 +42,9 @@ impl<S: State> Flex<S> {
 	}
 }
 
-impl<S: State + std::fmt::Debug> Widget<S> for Flex<S> {
+impl<S: State + std::fmt::Debug> Widget for Flex<S> {
+	type S = S;
+
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
 		ctx.sc.max
 	}

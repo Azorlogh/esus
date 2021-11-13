@@ -22,23 +22,24 @@ pub mod pod;
 pub use pod::Pod;
 
 mod ext;
-// pub use ext::WidgetExt;
+pub use ext::WidgetExt;
 
-pub trait Widget<S: State> {
+pub trait Widget {
+	type S: State;
 	// for event handling
-	fn event(&mut self, _ctx: &mut EventCtx<S>) {}
+	fn event(&mut self, _ctx: &mut EventCtx<Self::S>) {}
 
-	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
+	fn size(&mut self, ctx: &mut SizeCtx<Self::S>) -> Size {
 		ctx.sc.max
 	}
 
 	// to inform the instance of this widget's Layout
-	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
+	fn layout(&mut self, ctx: &mut LayoutCtx<Self::S>) -> Layout {
 		ctx.suggestion
 	}
 
 	// for painting
-	fn paint(&mut self, _ctx: &mut PaintCtx<S>) {}
+	fn paint(&mut self, _ctx: &mut PaintCtx<Self::S>) {}
 }
 
 pub mod prelude {

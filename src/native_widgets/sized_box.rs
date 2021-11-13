@@ -1,6 +1,6 @@
 use crate::{
 	state::State,
-	widget::{self, LayoutCtx, SizeCtx, Widget},
+	widget::{self, EventCtx, LayoutCtx, PaintCtx, SizeCtx, Widget},
 	Layout, Size,
 };
 
@@ -11,7 +11,7 @@ pub struct SizedBox<S: State> {
 }
 
 impl<S: State> SizedBox<S> {
-	pub fn new(child: impl Widget<S> + 'static) -> SizedBox<S> {
+	pub fn new(child: impl Widget<S = S> + 'static) -> SizedBox<S> {
 		let id = SizedBox {
 			child: Some(widget::Pod::new(child)),
 			width: None,
@@ -31,7 +31,9 @@ impl<S: State> SizedBox<S> {
 	}
 }
 
-impl<S: State> Widget<S> for SizedBox<S> {
+impl<S: State> Widget for SizedBox<S> {
+	type S = S;
+
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
 		let mut size = if let Some(child) = &mut self.child {
 			child.size(ctx)
@@ -52,5 +54,17 @@ impl<S: State> Widget<S> for SizedBox<S> {
 			child.layout(ctx);
 		}
 		ctx.suggestion
+	}
+
+	fn event(&mut self, ctx: &mut EventCtx<S>) {
+		if let Some(child) = &mut self.child {
+			child.event(ctx);
+		}
+	}
+
+	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
+		if let Some(child) = &mut self.child {
+			child.paint(ctx);
+		}
 	}
 }

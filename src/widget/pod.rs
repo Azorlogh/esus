@@ -3,7 +3,7 @@ use crate::{event::Event, state::State, Size};
 use super::{EventCtx, Layout, LayoutCtx, PaintCtx, SizeCtx, Widget};
 
 pub struct Pod<S> {
-	pub inner: Box<dyn Widget<S>>,
+	pub inner: Box<dyn Widget<S = S>>,
 	pub is_active: bool,
 	pub layout: Option<Layout>,
 }
@@ -18,7 +18,7 @@ impl<S> std::fmt::Debug for Pod<S> {
 }
 
 impl<S: State> Pod<S> {
-	pub fn new(widget: impl Widget<S> + 'static) -> Pod<S> {
+	pub fn new(widget: impl Widget<S = S> + 'static) -> Pod<S> {
 		Pod {
 			inner: Box::new(widget),
 			is_active: false,

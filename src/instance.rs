@@ -53,7 +53,7 @@ impl<S: State> Builder<S> {
 		self
 	}
 
-	pub fn with_view(mut self, builder: impl Widget<S> + 'static) -> Self {
+	pub fn with_view(mut self, builder: impl Widget<S = S> + 'static) -> Self {
 		{
 			self.view = Some(widget::Pod::new(builder));
 		}

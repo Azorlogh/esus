@@ -44,7 +44,9 @@ impl<S: 'static> Label<S> {
 	}
 }
 
-impl<S: State> Widget<S> for Label<S> {
+impl<S: State> Widget for Label<S> {
+	type S = S;
+
 	fn size(&mut self, _ctx: &mut SizeCtx<S>) -> Size {
 		self.size
 	}

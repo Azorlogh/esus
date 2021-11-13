@@ -1,0 +1,3 @@
+# Esus
+
+This is an toy GUI library that I am developing to explore the challenges that come with GUI, such as rendering, memory model, layouting...
