@@ -1,4 +1,4 @@
-use kurbo::Point;
+use crate::Point;
 use std::collections::HashMap;
 use winit::event::{MouseButton, ScanCode};
 

@@ -36,10 +36,7 @@ impl<S: 'static> Label<S> {
 	pub fn new(text: impl Into<LabelText<S>>) -> Label<S> {
 		// let font = ab_glyph::FontArc::try_from_slice(include_bytes!("../painter/Ubuntu-M.ttf"))
 		// 	.expect("couldn't load font");
-		let size = Size {
-			width: 100.0,
-			height: 20.0,
-		};
+		let size = Size::new(100.0, 20.0);
 		Label {
 			size,
 			text: text.into(),

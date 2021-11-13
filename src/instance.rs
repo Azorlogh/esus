@@ -5,9 +5,8 @@ use crate::{
 	render::{self, Renderer},
 	state::State,
 	widget::{self, Widget},
-	Size,
+	Point, Rect, Size,
 };
-use kurbo::{Point, Rect};
 use std::os::raw::c_void;
 // use winapi::shared::windef::HWND;
 // use winit::platform::windows::WindowBuilderExtWindows
@@ -91,13 +90,7 @@ impl<S: State> Builder<S> {
 			let mut ctx = widget::LayoutCtx::new(
 				&mut state,
 				crate::data::Layout {
-					rect: Rect::from_origin_size(
-						Point::ORIGIN,
-						Size {
-							width: size.width as f64,
-							height: size.height as f64,
-						},
-					),
+					rect: Rect::from_size(Size::new(size.width as f32, size.height as f32)),
 					depth: 0.0,
 				},
 			);
@@ -207,7 +200,7 @@ impl<S: State> Instance<S> {
 						}
 					},
 					wevent::WindowEvent::CursorMoved { position, .. } => {
-						let pos = Point::new(position.x, position.y);
+						let pos = Point::new(position.x as f32, position.y as f32);
 						let old_pos = devices.mouse.pos;
 						events.push_back(Event::MouseMove(MouseMove {
 							screen_pos: pos,

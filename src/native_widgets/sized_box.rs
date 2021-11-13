@@ -6,8 +6,8 @@ use crate::{
 
 pub struct SizedBox<S: State> {
 	child: Option<widget::Pod<S>>,
-	width: Option<f64>,
-	height: Option<f64>,
+	width: Option<f32>,
+	height: Option<f32>,
 }
 
 impl<S: State> SizedBox<S> {
@@ -20,12 +20,12 @@ impl<S: State> SizedBox<S> {
 		id
 	}
 
-	pub fn fix_width(mut self, width: f64) -> Self {
+	pub fn fix_width(mut self, width: f32) -> Self {
 		self.width = Some(width);
 		self
 	}
 
-	pub fn fix_height(mut self, height: f64) -> Self {
+	pub fn fix_height(mut self, height: f32) -> Self {
 		self.height = Some(height);
 		self
 	}

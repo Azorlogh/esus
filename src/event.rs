@@ -1,4 +1,4 @@
-use kurbo::{Point, Vec2};
+use crate::{Point, Vector};
 use winit::event::MouseButton;
 
 #[derive(Debug, Clone)]
@@ -20,8 +20,8 @@ pub struct MouseMove {
 }
 
 impl MouseMove {
-	pub fn delta(&self) -> Vec2 {
-		self.pos.to_vec2() - self.old_pos.to_vec2()
+	pub fn delta(&self) -> Vector {
+		self.pos.to_vector() - self.old_pos.to_vector()
 	}
 }
 

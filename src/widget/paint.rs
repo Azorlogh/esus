@@ -1,6 +1,9 @@
+use lyon::lyon_tessellation::{FillOptions, FillTessellator, VertexBuffers};
+use lyon::path::Path;
+
 use crate::painter::Painter;
 use crate::render::RenderCtx;
-use crate::{Layout, Rect};
+use crate::{Color, Layout, Rect};
 
 pub struct PaintCtx<'a, 'r, S> {
 	pub render_ctx: &'a mut RenderCtx<'r>,
@@ -16,29 +19,27 @@ pub enum DrawMode {
 
 impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 	pub fn rect(&mut self, _: DrawMode, rect: Rect) {
-		self.painter.rect.fill(
-			&mut self.render_ctx,
-			(rect.x0 as f32, rect.y0 as f32),
-			(rect.x1 as f32, rect.y1 as f32),
-		);
+		// self.painter.rect.fill(
+		// 	&mut self.render_ctx,
+		// 	(rect.x0 as f32, rect.y0 as f32),
+		// 	(rect.x1 as f32, rect.y1 as f32),
+		// );
+	}
+
+	pub fn fill(&mut self, path: &Path, color: Color) {
+		self.painter.brush.set_color(self.render_ctx, color);
+		self.painter.brush.fill(self.render_ctx, path);
 	}
 
 	pub fn print(&mut self, rect: Rect, text: &str) {
-		println!("drawing text with bounds {:?}", rect);
 		let section = wgpu_glyph::Section::default()
 			.add_text(
 				wgpu_glyph::Text::new(text)
 					.with_color([1.0, 1.0, 1.0, 1.0])
 					.with_scale(12.0),
 			)
-			.with_screen_position((
-				(rect.x0 as f32 + rect.x1 as f32) / 2.0,
-				(rect.y0 as f32 + rect.y1 as f32) / 2.0,
-			))
-			.with_bounds((
-				rect.x1 as f32 - rect.x0 as f32,
-				rect.y1 as f32 - rect.y0 as f32,
-			))
+			.with_screen_position(rect.center())
+			.with_bounds(rect.size)
 			.with_layout(
 				wgpu_glyph::Layout::default()
 					.h_align(wgpu_glyph::HorizontalAlign::Center)
@@ -58,6 +59,8 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 			)
 			.expect("something went wrong drawing glyphs");
 	}
+
+	// pub fn fill()
 
 	pub fn layout(&self) -> Layout {
 		self.layout.clone()

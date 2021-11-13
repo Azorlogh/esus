@@ -1,5 +1,14 @@
 use winit::{dpi::PhysicalSize, window::Window};
 
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct Vertex {
+	pub pos: [f32; 2],
+}
+
+unsafe impl bytemuck::Pod for Vertex {}
+unsafe impl bytemuck::Zeroable for Vertex {}
+
 pub struct Renderer {
 	pub device: wgpu::Device,
 	pub queue: wgpu::Queue,

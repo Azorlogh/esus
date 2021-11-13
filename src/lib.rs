@@ -2,7 +2,7 @@ pub fn init_simple_logger() {
 	simple_logger::init_with_level(log::Level::Warn).expect("Failed to init simple logger");
 }
 
-pub use kurbo::{Rect, Size};
+pub use lyon::math::{Point, Rect, Size, Vector};
 
 pub mod device;
 pub mod event;

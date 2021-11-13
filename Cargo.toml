@@ -15,10 +15,11 @@ wgpu = { version = "0.11.0", features = ["spirv"] }
 futures = "0.3.0"
 shaderc = "0.6.2"
 zerocopy = "0.3.0"
-kurbo = "0.6.2"
 wgpu_glyph = "0.15"
 ab_glyph = "0.2.5"
 lyon = "0.17"
+bytemuck = "1.7"
+cgmath = "0.18.0"
 
 [target.'cfg(target_os = "windows")'.dependencies.winapi]
 version = "0.3.6"

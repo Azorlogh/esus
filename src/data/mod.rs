@@ -1,4 +1,4 @@
-pub use kurbo::Size;
+pub use crate::Size;
 
 mod axis;
 pub use axis::Axis;
@@ -8,3 +8,6 @@ pub use size_constraints::SizeConstraints;
 
 mod layout;
 pub use layout::Layout;
+
+mod color;
+pub use color::Color;

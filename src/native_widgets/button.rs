@@ -1,4 +1,6 @@
-use crate::{state::State, widget::prelude::*};
+use lyon::path::{builder::BorderRadii, traits::PathBuilder, Winding};
+
+use crate::{state::State, widget::prelude::*, Color};
 
 pub struct Button<M> {
 	msg: Option<M>,
@@ -32,7 +34,14 @@ impl<S: State> Widget<S> for Button<S::Message> {
 	}
 
 	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
-		ctx.rect(widget::paint::DrawMode::Fill, ctx.layout().rect);
-		// ctx.stroke(rect(10, 10))
+		let mut builder = lyon::path::Path::builder();
+		builder.add_rounded_rectangle(
+			&ctx.layout().rect,
+			&BorderRadii::new(3.0),
+			Winding::Positive,
+		);
+		let path = builder.build();
+
+		ctx.fill(&path, Color([0.35, 0.3, 0.05, 1.0]));
 	}
 }

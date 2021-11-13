@@ -1,13 +1,13 @@
 use crate::{
 	state::State,
 	widget::{self, LayoutCtx, PaintCtx, SizeCtx, Widget},
-	Axis, Layout, Rect, Size, SizeConstraints,
+	Axis, Layout, Point, Rect, Size, SizeConstraints,
 };
 
 #[derive(Debug)]
 pub struct ChildWidget<S> {
 	widget: widget::Pod<S>,
-	flex: f64,
+	flex: f32,
 }
 
 pub struct Flex<S> {
@@ -33,7 +33,7 @@ impl<S: State> Flex<S> {
 		self.with_flex_child(c, 0.0)
 	}
 
-	pub fn with_flex_child(mut self, c: impl Widget<S> + 'static, flex: f64) -> Flex<S> {
+	pub fn with_flex_child(mut self, c: impl Widget<S> + 'static, flex: f32) -> Flex<S> {
 		self.children.push(ChildWidget {
 			widget: widget::Pod::new(c),
 			flex,
@@ -49,7 +49,7 @@ impl<S: State + std::fmt::Debug> Widget<S> for Flex<S> {
 
 	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
 		let suggestion = ctx.suggestion;
-		let size = suggestion.rect.size();
+		let size = suggestion.rect.size;
 		let constraints = SizeConstraints {
 			min: Size::new(0.0, 0.0),
 			max: size,
@@ -78,10 +78,10 @@ impl<S: State + std::fmt::Debug> Widget<S> for Flex<S> {
 			let mut ctx = LayoutCtx::new(
 				ctx.state,
 				Layout {
-					rect: Rect::from_origin_size(
-						self.axis.with_major((0.0, 0.0), curr_major),
+					rect: Rect {
+						origin: self.axis.with_major(Point::origin(), curr_major),
 						size,
-					),
+					},
 					depth: 0.0,
 				},
 			);
