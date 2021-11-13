@@ -27,6 +27,7 @@ fn main() {
 	esus::init_simple_logger();
 
 	let mut instance = instance::Builder::<State>::new()
+		.with_size((350.0, 1000.0))
 		.with_title("Epic test app")
 		.with_state(State {
 			count: 0,

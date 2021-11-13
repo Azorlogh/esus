@@ -7,6 +7,7 @@ use rect::Rect;
 
 mod brush;
 use brush::Brush;
+use winit::dpi::PhysicalSize;
 
 pub struct Painter {
 	pub rect: Rect,
@@ -33,5 +34,9 @@ impl Painter {
 			brush,
 			glyph_brush,
 		}
+	}
+
+	pub fn resize(&mut self, size: PhysicalSize<u32>) {
+		self.brush.resize(size);
 	}
 }

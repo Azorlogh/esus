@@ -65,8 +65,11 @@ impl<S: State> Builder<S> {
 		self
 	}
 
-	pub fn with_size(mut self, size: PhysicalSize<u32>) -> Self {
-		self.size = size;
+	pub fn with_size<T>(mut self, size: T) -> Self
+	where
+		T: Into<PhysicalSize<u32>>,
+	{
+		self.size = size.into();
 		self
 	}
 
@@ -74,6 +77,7 @@ impl<S: State> Builder<S> {
 		let event_loop = EventLoop::new();
 		let window_builder = WindowBuilder::new()
 			.with_title(self.title)
+			.with_inner_size(self.size)
 			.with_resizable(false);
 		// if let Some(handle) = self.parent_window {
 		// 	window_builder = window_builder.with_parent_window(handle as HWND);
@@ -160,9 +164,11 @@ impl<S: State> Instance<S> {
 					..
 				} => {
 					renderer.resize(size);
+					painter.resize(size);
 				}
 				wevent::Event::MainEventsCleared => {}
 				wevent::Event::RedrawRequested(_) => {
+					println!("drawing");
 					let mut render_ctx = render::next_frame(
 						&mut renderer.device,
 						&mut renderer.surface,

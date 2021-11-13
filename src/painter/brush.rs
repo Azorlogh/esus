@@ -10,9 +10,31 @@ use lyon::{
 	path::Path,
 };
 use wgpu::util::DeviceExt;
+use winit::dpi::PhysicalSize;
 
 const UNIFORM_SIZE: wgpu::BufferAddress = 16 * std::mem::size_of::<f32>() as wgpu::BufferAddress;
 const VERTEX_SIZE: wgpu::BufferAddress = 2 * std::mem::size_of::<f32>() as wgpu::BufferAddress;
+
+fn make_matrix(width: u32, height: u32) -> cgmath::Matrix4<f32> {
+	cgmath::Matrix4::new(
+		2.0 / width as f32,
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		-2.0 / height as f32,
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		-1.0,
+		1.0,
+		0.0,
+		1.0,
+	)
+}
 
 #[allow(dead_code)]
 pub struct Brush {
@@ -22,8 +44,8 @@ pub struct Brush {
 	color_buf: wgpu::Buffer,
 	bind_group: wgpu::BindGroup,
 	pipeline: wgpu::RenderPipeline,
-
 	transform: cgmath::Matrix4<f32>,
+	resized: bool,
 }
 
 impl Brush {
@@ -47,24 +69,7 @@ impl Brush {
 				))),
 			});
 
-		let transform = cgmath::Matrix4::new(
-			2.0 / renderer.surface_cfg.width as f32,
-			0.0,
-			0.0,
-			0.0,
-			0.0,
-			-2.0 / renderer.surface_cfg.height as f32,
-			0.0,
-			0.0,
-			0.0,
-			0.0,
-			0.0,
-			0.0,
-			-1.0,
-			1.0,
-			0.0,
-			1.0,
-		);
+		let transform = make_matrix(renderer.surface_cfg.width, renderer.surface_cfg.height);
 
 		let tr_buf = renderer
 			.device
@@ -177,7 +182,13 @@ impl Brush {
 			bind_group,
 			pipeline,
 			transform,
+			resized: false,
 		}
+	}
+
+	pub fn resize(&mut self, size: PhysicalSize<u32>) {
+		self.resized = true;
+		self.transform = make_matrix(size.width, size.height);
 	}
 
 	pub fn set_color(&mut self, render_ctx: &mut RenderCtx, col: Color) {
@@ -201,7 +212,7 @@ impl Brush {
 	}
 
 	pub fn fill(&mut self, render_ctx: &mut RenderCtx, path: &Path) {
-		{
+		if self.resized {
 			let buf = render_ctx
 				.device
 				.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -213,6 +224,7 @@ impl Brush {
 			render_ctx
 				.encoder
 				.copy_buffer_to_buffer(&buf, 0, &self.transform_buf, 0, UNIFORM_SIZE);
+			self.resized = false;
 		}
 
 		let mut geometry: VertexBuffers<Vertex, u16> = VertexBuffers::new();
