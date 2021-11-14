@@ -9,10 +9,12 @@ use esus::{
 };
 
 // Some useful data types
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Operation {
 	Add,
 	Sub,
+	Mul,
+	Div,
 }
 
 #[derive(Debug)]
@@ -45,11 +47,31 @@ impl State {
 	}
 
 	fn backspace(&mut self) {
-		if self.is_result {
+		if !self.is_result {
 			self.value.pop();
 			if self.value.is_empty() || self.value == "-" {
 				self.value = "0".to_string();
-				self.is_result = false;
+				self.is_result = true;
+			}
+		}
+	}
+
+	fn swap_sign(&mut self) {
+		if !self.is_result {
+			if self.value.starts_with('-') {
+				self.value = self.value[1..].to_string();
+			} else {
+				self.value = ["-", &self.value].concat();
+			}
+		}
+	}
+
+	fn decimal_mark(&mut self) {
+		if self.is_result {
+			self.value = "0.".to_owned();
+		} else {
+			if !self.value.contains('.') {
+				self.value += ".";
 			}
 		}
 	}
@@ -75,6 +97,8 @@ impl State {
 			let result = match op {
 				Operation::Add => self.operand + value,
 				Operation::Sub => self.operand - value,
+				Operation::Mul => self.operand * value,
+				Operation::Div => self.operand / value,
 			};
 			self.value = format!("{}", result);
 			self.is_result = true;
@@ -89,8 +113,9 @@ enum Message {
 	ClearEntry,
 	Clear,
 	Backspace,
-	Add,
-	Sub,
+	DecimalMark,
+	Op(Operation),
+	SwapSign,
 	Equal,
 }
 
@@ -113,9 +138,10 @@ fn main() {
 			Message::ClearEntry => state.clear_entry(),
 			Message::Clear => state.clear(),
 			Message::Backspace => state.backspace(),
+			Message::SwapSign => state.swap_sign(),
+			Message::DecimalMark => state.decimal_mark(),
 			Message::Digit(dgt) => state.digit(dgt),
-			Message::Add => state.operation(Operation::Add),
-			Message::Sub => state.operation(Operation::Sub),
+			Message::Op(op) => state.operation(op),
 			Message::Equal => state.evaluate(),
 		})
 		.with_view({
@@ -130,8 +156,8 @@ fn main() {
 					Flex::row()
 						.with_flex_child(button("CE").on_click(Message::ClearEntry), 1.0)
 						.with_flex_child(button("C").on_click(Message::Clear), 1.0)
-						.with_flex_child(button("⌫").on_click(Message::Backspace), 1.0)
-						.with_flex_child(button("#").on_click(Message::Digit(0)), 1.0),
+						.with_flex_child(button("<×").on_click(Message::Backspace), 1.0)
+						.with_flex_child(button("÷").on_click(Message::Op(Operation::Div)), 1.0),
 					1.0,
 				)
 				.with_flex_child(
@@ -139,7 +165,7 @@ fn main() {
 						.with_flex_child(button("7").on_click(Message::Digit(7)), 1.0)
 						.with_flex_child(button("8").on_click(Message::Digit(8)), 1.0)
 						.with_flex_child(button("9").on_click(Message::Digit(9)), 1.0)
-						.with_flex_child(button("#").on_click(Message::Digit(0)), 1.0),
+						.with_flex_child(button("×").on_click(Message::Op(Operation::Mul)), 1.0),
 					1.0,
 				)
 				.with_flex_child(
@@ -147,7 +173,7 @@ fn main() {
 						.with_flex_child(button("4").on_click(Message::Digit(4)), 1.0)
 						.with_flex_child(button("5").on_click(Message::Digit(5)), 1.0)
 						.with_flex_child(button("6").on_click(Message::Digit(6)), 1.0)
-						.with_flex_child(button("-").on_click(Message::Sub), 1.0),
+						.with_flex_child(button("-").on_click(Message::Op(Operation::Sub)), 1.0),
 					1.0,
 				)
 				.with_flex_child(
@@ -155,14 +181,14 @@ fn main() {
 						.with_flex_child(button("1").on_click(Message::Digit(1)), 1.0)
 						.with_flex_child(button("2").on_click(Message::Digit(2)), 1.0)
 						.with_flex_child(button("3").on_click(Message::Digit(3)), 1.0)
-						.with_flex_child(button("+").on_click(Message::Add), 1.0),
+						.with_flex_child(button("+").on_click(Message::Op(Operation::Add)), 1.0),
 					1.0,
 				)
 				.with_flex_child(
 					Flex::row()
-						.with_flex_child(button("#").on_click(Message::Digit(0)), 1.0)
+						.with_flex_child(button("±").on_click(Message::SwapSign), 1.0)
 						.with_flex_child(button("0").on_click(Message::Digit(0)), 1.0)
-						.with_flex_child(button("#").on_click(Message::Digit(0)), 1.0)
+						.with_flex_child(button(".").on_click(Message::DecimalMark), 1.0)
 						.with_flex_child(button("=").on_click(Message::Equal), 1.0),
 					1.0,
 				)

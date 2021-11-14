@@ -165,6 +165,19 @@ impl<S: State> Instance<S> {
 				} => {
 					renderer.resize(size);
 					painter.resize(size);
+					{
+						let mut ctx = widget::LayoutCtx::new(
+							state,
+							crate::data::Layout {
+								rect: Rect::from_size(Size::new(
+									size.width as f32,
+									size.height as f32,
+								)),
+								depth: 0.0,
+							},
+						);
+						view.layout(&mut ctx);
+					}
 				}
 				wevent::Event::MainEventsCleared => {}
 				wevent::Event::RedrawRequested(_) => {

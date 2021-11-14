@@ -27,7 +27,7 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 			.add_text(
 				wgpu_glyph::Text::new(text)
 					.with_color(color.0)
-					.with_scale(12.0),
+					.with_scale(20.0),
 			)
 			.with_screen_position(rect.center())
 			.with_bounds(rect.size)
