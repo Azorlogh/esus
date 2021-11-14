@@ -4,8 +4,7 @@
 use esus::{
 	instance,
 	native_widgets::{Button, Flex, Label, LabelText},
-	widget::WidgetExt,
-	Color,
+	widget::{Widget, WidgetExt},
 };
 
 // Some useful data types
@@ -123,8 +122,8 @@ impl esus::State for State {
 	type Message = Message;
 }
 
-fn button(txt: &str) -> Button<State> {
-	Button::new(Label::new(txt))
+fn button(txt: &str, msg: Message) -> impl Widget<S = State> {
+	Button::new(Label::new(txt)).on_click(msg).with_padding(1.0)
 }
 
 fn main() {
@@ -154,42 +153,42 @@ fn main() {
 				)
 				.with_flex_child(
 					Flex::row()
-						.with_flex_child(button("CE").on_click(Message::ClearEntry), 1.0)
-						.with_flex_child(button("C").on_click(Message::Clear), 1.0)
-						.with_flex_child(button("<×").on_click(Message::Backspace), 1.0)
-						.with_flex_child(button("÷").on_click(Message::Op(Operation::Div)), 1.0),
+						.with_flex_child(button("CE", Message::ClearEntry), 1.0)
+						.with_flex_child(button("C", Message::Clear), 1.0)
+						.with_flex_child(button("<×", Message::Backspace), 1.0)
+						.with_flex_child(button("÷", Message::Op(Operation::Div)), 1.0),
 					1.0,
 				)
 				.with_flex_child(
 					Flex::row()
-						.with_flex_child(button("7").on_click(Message::Digit(7)), 1.0)
-						.with_flex_child(button("8").on_click(Message::Digit(8)), 1.0)
-						.with_flex_child(button("9").on_click(Message::Digit(9)), 1.0)
-						.with_flex_child(button("×").on_click(Message::Op(Operation::Mul)), 1.0),
+						.with_flex_child(button("7", Message::Digit(7)), 1.0)
+						.with_flex_child(button("8", Message::Digit(8)), 1.0)
+						.with_flex_child(button("9", Message::Digit(9)), 1.0)
+						.with_flex_child(button("×", Message::Op(Operation::Mul)), 1.0),
 					1.0,
 				)
 				.with_flex_child(
 					Flex::row()
-						.with_flex_child(button("4").on_click(Message::Digit(4)), 1.0)
-						.with_flex_child(button("5").on_click(Message::Digit(5)), 1.0)
-						.with_flex_child(button("6").on_click(Message::Digit(6)), 1.0)
-						.with_flex_child(button("-").on_click(Message::Op(Operation::Sub)), 1.0),
+						.with_flex_child(button("4", Message::Digit(4)), 1.0)
+						.with_flex_child(button("5", Message::Digit(5)), 1.0)
+						.with_flex_child(button("6", Message::Digit(6)), 1.0)
+						.with_flex_child(button("-", Message::Op(Operation::Sub)), 1.0),
 					1.0,
 				)
 				.with_flex_child(
 					Flex::row()
-						.with_flex_child(button("1").on_click(Message::Digit(1)), 1.0)
-						.with_flex_child(button("2").on_click(Message::Digit(2)), 1.0)
-						.with_flex_child(button("3").on_click(Message::Digit(3)), 1.0)
-						.with_flex_child(button("+").on_click(Message::Op(Operation::Add)), 1.0),
+						.with_flex_child(button("1", Message::Digit(1)), 1.0)
+						.with_flex_child(button("2", Message::Digit(2)), 1.0)
+						.with_flex_child(button("3", Message::Digit(3)), 1.0)
+						.with_flex_child(button("+", Message::Op(Operation::Add)), 1.0),
 					1.0,
 				)
 				.with_flex_child(
 					Flex::row()
-						.with_flex_child(button("±").on_click(Message::SwapSign), 1.0)
-						.with_flex_child(button("0").on_click(Message::Digit(0)), 1.0)
-						.with_flex_child(button(".").on_click(Message::DecimalMark), 1.0)
-						.with_flex_child(button("=").on_click(Message::Equal), 1.0),
+						.with_flex_child(button("±", Message::SwapSign), 1.0)
+						.with_flex_child(button("0", Message::Digit(0)), 1.0)
+						.with_flex_child(button(".", Message::DecimalMark), 1.0)
+						.with_flex_child(button("=", Message::Equal), 1.0),
 					1.0,
 				)
 		})
