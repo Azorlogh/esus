@@ -20,6 +20,7 @@ ab_glyph = "0.2.5"
 lyon = "0.17"
 bytemuck = "1.7"
 cgmath = "0.18.0"
+rand = "0.8"
 
 [target.'cfg(target_os = "windows")'.dependencies.winapi]
 version = "0.3.6"

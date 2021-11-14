@@ -1,4 +1,4 @@
-use crate::{state::State, widget::prelude::*};
+use crate::{state::State, widget::prelude::*, Color};
 
 pub enum LabelText<S> {
 	/// Specific text
@@ -40,26 +40,19 @@ Use env to get font info and get label size.
 #[derive(Debug)]
 pub struct Label<S> {
 	text: LabelText<S>,
-	size: Size,
 }
 
 impl<S: 'static> Label<S> {
 	pub fn new(text: impl Into<LabelText<S>>) -> Label<S> {
-		// let font = ab_glyph::FontArc::try_from_slice(include_bytes!("../painter/Ubuntu-M.ttf"))
-		// 	.expect("couldn't load font");
-		let size = Size::new(100.0, 20.0);
-		Label {
-			size,
-			text: text.into(),
-		}
+		Label { text: text.into() }
 	}
 }
 
 impl<S: State> Widget for Label<S> {
 	type S = S;
 
-	fn size(&mut self, _ctx: &mut SizeCtx<S>) -> Size {
-		self.size
+	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
+		ctx.sc.max
 	}
 
 	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
@@ -68,6 +61,10 @@ impl<S: State> Widget for Label<S> {
 
 	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
 		let rect = ctx.layout().rect;
-		ctx.print(rect, &self.text.resolve(ctx.state));
+		ctx.print(
+			rect,
+			&self.text.resolve(ctx.state),
+			Color([46.0 / 255.0, 52.0 / 255.0, 64.0 / 255.0, 1.0]),
+		);
 	}
 }

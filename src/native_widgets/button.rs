@@ -1,17 +1,29 @@
 use lyon::path::{builder::BorderRadii, traits::PathBuilder, Winding};
 
-use crate::{state::State, widget::prelude::*, Color};
+use crate::{
+	state::State,
+	widget::{layout, prelude::*},
+	Color,
+};
 
 #[derive(Debug)]
 pub struct Button<S: State> {
 	color: Color,
 	msg: Option<S::Message>,
+	child: Option<widget::Pod<S>>,
 }
 
 impl<S: State> Button<S> {
-	pub fn new() -> Self {
+	pub fn new(child: impl Widget<S = S> + 'static) -> Self {
+		let mut s = Self::empty();
+		s.child = Some(widget::Pod::new(child));
+		s
+	}
+
+	pub fn empty() -> Self {
 		Self {
-			color: Color([0.35, 0.3, 0.05, 1.0]),
+			child: None,
+			color: Color([136.0 / 255.0, 192.0 / 255.0, 208.0 / 255.0, 1.0]),
 			msg: None,
 		}
 	}
@@ -30,8 +42,19 @@ impl<S: State> Button<S> {
 impl<S: State> Widget for Button<S> {
 	type S = S;
 
-	fn size(&mut self, _ctx: &mut SizeCtx<S>) -> Size {
-		Size::new(100.0, 20.0)
+	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
+		if let Some(child) = &mut self.child {
+			child.size(ctx)
+		} else {
+			ctx.sc.max
+		}
+	}
+
+	fn layout(&mut self, ctx: &mut LayoutCtx<Self::S>) -> Layout {
+		if let Some(child) = &mut self.child {
+			child.layout(ctx);
+		}
+		ctx.suggestion
 	}
 
 	fn event(&mut self, ctx: &mut EventCtx<S>) {
@@ -55,5 +78,9 @@ impl<S: State> Widget for Button<S> {
 		let path = builder.build();
 
 		ctx.fill(&path, self.color);
+
+		if let Some(child) = &mut self.child {
+			child.paint(ctx);
+		}
 	}
 }

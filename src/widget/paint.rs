@@ -22,11 +22,11 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 		self.painter.brush.fill(self.render_ctx, path);
 	}
 
-	pub fn print(&mut self, rect: Rect, text: &str) {
+	pub fn print(&mut self, rect: Rect, text: &str, color: Color) {
 		let section = wgpu_glyph::Section::default()
 			.add_text(
 				wgpu_glyph::Text::new(text)
-					.with_color([1.0, 1.0, 1.0, 1.0])
+					.with_color(color.0)
 					.with_scale(12.0),
 			)
 			.with_screen_position(rect.center())

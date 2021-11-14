@@ -92,7 +92,8 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 				let mut ctx = SizeCtx::new(ctx.state, constraints);
 				child.widget.size(&mut ctx)
 			} else {
-				Size::new(size.width, remaining_major * (child.flex / flex_total))
+				self.axis
+					.with_major(size, remaining_major * (child.flex / flex_total))
 			};
 			let mut ctx = LayoutCtx::new(
 				ctx.state,
