@@ -2,24 +2,17 @@ use crate::render::{RenderCtx, Renderer};
 
 use wgpu_glyph::{GlyphBrush, GlyphBrushBuilder};
 
-mod rect;
-use rect::Rect;
-
 mod brush;
 use brush::Brush;
 use winit::dpi::PhysicalSize;
 
 pub struct Painter {
-	pub rect: Rect,
 	pub brush: Brush,
 	pub glyph_brush: GlyphBrush<()>,
 }
 
 impl Painter {
 	pub fn new(renderer: &Renderer) -> Painter {
-		println!("initializing rect painter");
-		let rect = Rect::new(renderer);
-
 		println!("initializing brush");
 		let brush = Brush::new(renderer);
 
@@ -29,11 +22,7 @@ impl Painter {
 		let glyph_brush = GlyphBrushBuilder::using_font(font)
 			.build(&renderer.device, wgpu::TextureFormat::Bgra8UnormSrgb);
 
-		Painter {
-			rect,
-			brush,
-			glyph_brush,
-		}
+		Painter { brush, glyph_brush }
 	}
 
 	pub fn resize(&mut self, size: PhysicalSize<u32>) {

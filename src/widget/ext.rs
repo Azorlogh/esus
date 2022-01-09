@@ -9,6 +9,10 @@ pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
 	fn fix_height(self, height: f32) -> SizedBox<S> {
 		SizedBox::new(self).fix_height(height)
 	}
+
+	fn with_padding(self, padding: f32) -> SizedBox<S> {
+		SizedBox::new(self).with_padding(padding)
+	}
 }
 
 impl<S: State, W: Widget<S = S> + 'static> WidgetExt<S> for W {}

@@ -1,10 +1,6 @@
 use lyon::path::{builder::BorderRadii, traits::PathBuilder, Winding};
 
-use crate::{
-	state::State,
-	widget::{layout, prelude::*},
-	Color,
-};
+use crate::{state::State, widget::prelude::*, Color};
 
 #[derive(Debug)]
 pub struct Button<S: State> {

@@ -38,8 +38,7 @@ fn make_matrix(width: u32, height: u32) -> cgmath::Matrix4<f32> {
 
 #[allow(dead_code)]
 pub struct Brush {
-	vs_module: wgpu::ShaderModule,
-	fs_module: wgpu::ShaderModule,
+	shader: wgpu::ShaderModule,
 	transform_buf: wgpu::Buffer,
 	color_buf: wgpu::Buffer,
 	bind_group: wgpu::BindGroup,
@@ -50,23 +49,11 @@ pub struct Brush {
 
 impl Brush {
 	pub fn new(renderer: &Renderer) -> Self {
-		let vs_module = renderer
+		let shader = renderer
 			.device
 			.create_shader_module(&wgpu::ShaderModuleDescriptor {
 				label: None,
-				source: wgpu::ShaderSource::SpirV(Cow::Owned(util::compile_shader(
-					include_str!("brush.vert"),
-					shaderc::ShaderKind::Vertex,
-				))),
-			});
-		let fs_module = renderer
-			.device
-			.create_shader_module(&wgpu::ShaderModuleDescriptor {
-				label: None,
-				source: wgpu::ShaderSource::SpirV(Cow::Owned(util::compile_shader(
-					include_str!("brush.frag"),
-					shaderc::ShaderKind::Fragment,
-				))),
+				source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("brush.wgsl"))),
 			});
 
 		let transform = make_matrix(renderer.surface_cfg.width, renderer.surface_cfg.height);
@@ -148,8 +135,8 @@ impl Brush {
 				label: None,
 				layout: Some(&pipeline_layout),
 				vertex: wgpu::VertexState {
-					module: &vs_module,
-					entry_point: "main",
+					module: &shader,
+					entry_point: "vert_main",
 					buffers: &[wgpu::VertexBufferLayout {
 						array_stride: VERTEX_SIZE,
 						step_mode: wgpu::VertexStepMode::Vertex,
@@ -161,8 +148,8 @@ impl Brush {
 					}],
 				},
 				fragment: Some(wgpu::FragmentState {
-					module: &fs_module,
-					entry_point: "main",
+					module: &shader,
+					entry_point: "frag_main",
 					targets: &[renderer.surface_cfg.format.into()],
 				}),
 				primitive: wgpu::PrimitiveState {
@@ -172,11 +159,11 @@ impl Brush {
 				},
 				depth_stencil: None,
 				multisample: wgpu::MultisampleState::default(),
+				multiview: None,
 			});
 
 		Self {
-			vs_module,
-			fs_module,
+			shader,
 			transform_buf: tr_buf,
 			color_buf: col_buf,
 			bind_group,
