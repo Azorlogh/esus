@@ -152,44 +152,44 @@ fn main() {
 					.fix_height(70.0),
 				)
 				.with_flex_child(
-					Flex::row()
-						.with_flex_child(button("CE", Message::ClearEntry), 1.0)
-						.with_flex_child(button("C", Message::Clear), 1.0)
-						.with_flex_child(button("<×", Message::Backspace), 1.0)
-						.with_flex_child(button("÷", Message::Op(Operation::Div)), 1.0),
 					1.0,
+					Flex::row()
+						.with_flex_child(1.0, button("CE", Message::ClearEntry))
+						.with_flex_child(1.0, button("C", Message::Clear))
+						.with_flex_child(1.0, button("<×", Message::Backspace))
+						.with_flex_child(1.0, button("÷", Message::Op(Operation::Div))),
 				)
 				.with_flex_child(
-					Flex::row()
-						.with_flex_child(button("7", Message::Digit(7)), 1.0)
-						.with_flex_child(button("8", Message::Digit(8)), 1.0)
-						.with_flex_child(button("9", Message::Digit(9)), 1.0)
-						.with_flex_child(button("×", Message::Op(Operation::Mul)), 1.0),
 					1.0,
+					Flex::row()
+						.with_flex_child(1.0, button("7", Message::Digit(7)))
+						.with_flex_child(1.0, button("8", Message::Digit(8)))
+						.with_flex_child(1.0, button("9", Message::Digit(9)))
+						.with_flex_child(1.0, button("×", Message::Op(Operation::Mul))),
 				)
 				.with_flex_child(
-					Flex::row()
-						.with_flex_child(button("4", Message::Digit(4)), 1.0)
-						.with_flex_child(button("5", Message::Digit(5)), 1.0)
-						.with_flex_child(button("6", Message::Digit(6)), 1.0)
-						.with_flex_child(button("-", Message::Op(Operation::Sub)), 1.0),
 					1.0,
+					Flex::row()
+						.with_flex_child(1.0, button("4", Message::Digit(4)))
+						.with_flex_child(1.0, button("5", Message::Digit(5)))
+						.with_flex_child(1.0, button("6", Message::Digit(6)))
+						.with_flex_child(1.0, button("-", Message::Op(Operation::Sub))),
 				)
 				.with_flex_child(
-					Flex::row()
-						.with_flex_child(button("1", Message::Digit(1)), 1.0)
-						.with_flex_child(button("2", Message::Digit(2)), 1.0)
-						.with_flex_child(button("3", Message::Digit(3)), 1.0)
-						.with_flex_child(button("+", Message::Op(Operation::Add)), 1.0),
 					1.0,
+					Flex::row()
+						.with_flex_child(1.0, button("1", Message::Digit(1)))
+						.with_flex_child(1.0, button("2", Message::Digit(2)))
+						.with_flex_child(1.0, button("3", Message::Digit(3)))
+						.with_flex_child(1.0, button("+", Message::Op(Operation::Add))),
 				)
 				.with_flex_child(
-					Flex::row()
-						.with_flex_child(button("±", Message::SwapSign), 1.0)
-						.with_flex_child(button("0", Message::Digit(0)), 1.0)
-						.with_flex_child(button(".", Message::DecimalMark), 1.0)
-						.with_flex_child(button("=", Message::Equal), 1.0),
 					1.0,
+					Flex::row()
+						.with_flex_child(1.0, button("±", Message::SwapSign))
+						.with_flex_child(1.0, button("0", Message::Digit(0)))
+						.with_flex_child(1.0, button(".", Message::DecimalMark))
+						.with_flex_child(1.0, button("=", Message::Equal)),
 				)
 		})
 		.build();
