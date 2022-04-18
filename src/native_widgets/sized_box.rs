@@ -45,21 +45,20 @@ impl<S: State> Widget for SizedBox<S> {
 	type S = S;
 
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
-		let mut size = if let Some(child) = &mut self.child {
-			if let Some(padding) = self.padding {
-				ctx.sc.max -= Size::new(padding * 2.0, padding * 2.0);
-			}
+		if let Some(width) = self.width {
+			ctx.sc.max.width = ctx.sc.max.width.min(width);
+		}
+		if let Some(height) = self.height {
+			ctx.sc.max.height = ctx.sc.max.height.min(height);
+		}
+		if let Some(padding) = self.padding {
+			ctx.sc.max -= Size::new(padding * 2.0, padding * 2.0);
+		}
+		if let Some(child) = &mut self.child {
 			child.size(ctx)
 		} else {
 			ctx.sc.max
-		};
-		if let Some(width) = self.width {
-			size.width = width;
 		}
-		if let Some(height) = self.height {
-			size.height = height;
-		}
-		size
 	}
 
 	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
