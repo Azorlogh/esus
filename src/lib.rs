@@ -12,7 +12,6 @@ mod painter;
 mod render;
 pub mod state;
 pub use state::State;
-mod util;
 pub mod widget;
 
 mod data;

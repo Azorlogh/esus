@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use super::RenderCtx;
 use crate::{
 	render::{Renderer, Vertex},
-	util, Color,
+	Color,
 };
 use lyon::{
 	lyon_tessellation::{BuffersBuilder, FillOptions, FillTessellator, FillVertex, VertexBuffers},
