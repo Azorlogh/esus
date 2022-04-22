@@ -46,6 +46,6 @@ pub mod prelude {
 	pub use crate::{
 		event::Event,
 		widget::{self, EventCtx, Id, LayoutCtx, PaintCtx, SizeCtx, Widget},
-		Layout, Rect, Size,
+		Layout, Rect, Size, SizeConstraints, Vector,
 	};
 }

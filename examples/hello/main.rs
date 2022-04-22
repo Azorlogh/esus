@@ -1,6 +1,6 @@
 use esus::{
 	instance,
-	native_widgets::{Button, Flex, Label, LabelText},
+	native_widgets::{Button, DropDown, Flex, Label, LabelText, SizedBox},
 	widget::WidgetExt,
 	Color,
 };
@@ -27,7 +27,7 @@ fn main() {
 	esus::init_simple_logger();
 
 	let mut instance = instance::Builder::<State>::new()
-		.with_size((350.0, 1000.0))
+		.with_size((350.0, 500.0))
 		.with_title("Epic test app")
 		.with_state(State {
 			count: 0,
@@ -41,6 +41,13 @@ fn main() {
 		})
 		.with_view({
 			Flex::column()
+				.with_child(
+					Flex::row().with_child(
+						DropDown::new(Button::new(Label::new("aaa")))
+							.fix_height(30.0)
+							.fix_width(100.0),
+					),
+				)
 				.with_flex_child(
 					1.0,
 					Flex::row()

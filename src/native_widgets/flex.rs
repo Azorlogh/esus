@@ -110,7 +110,6 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 			curr_major += self.axis.major(size);
 		}
 
-		log::warn!("flex layout done!");
 		suggestion
 	}
 

@@ -1,9 +1,12 @@
-use lyon::geom::euclid::SideOffsets2D;
+use lyon::{
+	geom::euclid::SideOffsets2D,
+	path::{traits::PathBuilder, Winding},
+};
 
 use crate::{
 	state::State,
 	widget::{self, EventCtx, LayoutCtx, PaintCtx, SizeCtx, Widget},
-	Layout, Size,
+	Color, Layout, Size,
 };
 
 #[derive(Debug)]
@@ -12,6 +15,7 @@ pub struct SizedBox<S: State> {
 	width: Option<f32>,
 	height: Option<f32>,
 	padding: Option<f32>,
+	background: Option<Color>,
 }
 
 impl<S: State> SizedBox<S> {
@@ -21,6 +25,7 @@ impl<S: State> SizedBox<S> {
 			width: None,
 			height: None,
 			padding: None,
+			background: None,
 		};
 		id
 	}
@@ -37,6 +42,11 @@ impl<S: State> SizedBox<S> {
 
 	pub fn with_padding(mut self, padding: f32) -> Self {
 		self.padding = Some(padding);
+		self
+	}
+
+	pub fn with_background(mut self, background: Color) -> Self {
+		self.background = Some(background);
 		self
 	}
 }
@@ -81,6 +91,12 @@ impl<S: State> Widget for SizedBox<S> {
 	}
 
 	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
+		if let Some(background) = self.background {
+			let mut builder = lyon::path::Path::builder();
+			builder.add_rectangle(&ctx.layout().rect, Winding::Positive);
+			let path = builder.build();
+			ctx.fill(&path, background);
+		}
 		if let Some(child) = &mut self.child {
 			child.paint(ctx);
 		}

@@ -1,5 +1,6 @@
 use crate::SizeConstraints;
 
+#[derive(Debug)]
 pub struct SizeCtx<'a, S> {
 	pub state: &'a S,
 	pub sc: SizeConstraints,

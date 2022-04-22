@@ -181,10 +181,26 @@ impl<S: State> Instance<S> {
 				}
 				wevent::Event::MainEventsCleared => {}
 				wevent::Event::RedrawRequested(_) => {
+					println!("figuring out layout");
+					{
+						let size = window.inner_size();
+						let mut ctx = widget::LayoutCtx::new(
+							state,
+							crate::data::Layout {
+								rect: Rect::from_size(Size::new(
+									size.width as f32,
+									size.height as f32,
+								)),
+								depth: 0.0,
+							},
+						);
+						view.layout(&mut ctx);
+					}
 					println!("drawing");
 					let mut render_ctx = render::next_frame(
 						&mut renderer.device,
 						&mut renderer.surface,
+						&mut renderer.depth_view,
 						renderer.size,
 						&mut renderer.staging_belt,
 						&mut renderer.local_pool,
@@ -229,8 +245,18 @@ impl<S: State> Instance<S> {
 
 			let mut messages = VecDeque::new();
 			for event in events {
-				let mut ctx = widget::EventCtx::new(&event, state, devices, &mut messages);
+				let mut redraw_requested = false;
+				let mut ctx = widget::EventCtx::new(
+					&event,
+					state,
+					devices,
+					&mut redraw_requested,
+					&mut messages,
+				);
 				view.event(&mut ctx);
+				if redraw_requested {
+					window.request_redraw();
+				}
 			}
 			if messages.len() > 0 {
 				window.request_redraw();

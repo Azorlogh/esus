@@ -5,6 +5,7 @@ pub struct EventCtx<'a, S: State> {
 	pub state: &'a S,
 	pub event: &'a Event,
 	pub devices: &'a DeviceStates,
+	redraw_requested: &'a mut bool,
 	msg_queue: &'a mut VecDeque<S::Message>,
 }
 
@@ -13,14 +14,20 @@ impl<'a, S: State> EventCtx<'a, S> {
 		event: &'a Event,
 		state: &'a S,
 		devices: &'a DeviceStates,
+		redraw_requested: &'a mut bool,
 		msg_queue: &'a mut VecDeque<S::Message>,
 	) -> EventCtx<'a, S> {
 		EventCtx {
 			state,
 			event,
 			devices,
+			redraw_requested,
 			msg_queue,
 		}
+	}
+
+	pub fn request_redraw(&mut self) {
+		*self.redraw_requested = true;
 	}
 
 	pub fn send(&mut self, msg: S::Message) {

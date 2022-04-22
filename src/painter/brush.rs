@@ -13,7 +13,7 @@ use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalSize;
 
 const UNIFORM_SIZE: wgpu::BufferAddress = 16 * std::mem::size_of::<f32>() as wgpu::BufferAddress;
-const VERTEX_SIZE: wgpu::BufferAddress = 2 * std::mem::size_of::<f32>() as wgpu::BufferAddress;
+const VERTEX_SIZE: wgpu::BufferAddress = 3 * std::mem::size_of::<f32>() as wgpu::BufferAddress;
 
 fn make_matrix(width: u32, height: u32) -> cgmath::Matrix4<f32> {
 	cgmath::Matrix4::new(
@@ -141,7 +141,7 @@ impl Brush {
 						array_stride: VERTEX_SIZE,
 						step_mode: wgpu::VertexStepMode::Vertex,
 						attributes: &[wgpu::VertexAttribute {
-							format: wgpu::VertexFormat::Float32x2,
+							format: wgpu::VertexFormat::Float32x3,
 							offset: 0,
 							shader_location: 0,
 						}],
@@ -157,7 +157,13 @@ impl Brush {
 					topology: wgpu::PrimitiveTopology::TriangleStrip,
 					..Default::default()
 				},
-				depth_stencil: None,
+				depth_stencil: Some(wgpu::DepthStencilState {
+					format: wgpu::TextureFormat::Depth32Float,
+					depth_write_enabled: true,
+					depth_compare: wgpu::CompareFunction::Less,
+					stencil: wgpu::StencilState::default(),
+					bias: wgpu::DepthBiasState::default(),
+				}),
 				multisample: wgpu::MultisampleState::default(),
 				multiview: None,
 			});
@@ -198,7 +204,7 @@ impl Brush {
 		}
 	}
 
-	pub fn fill(&mut self, render_ctx: &mut RenderCtx, path: &Path) {
+	pub fn fill(&mut self, render_ctx: &mut RenderCtx, path: &Path, depth: f32) {
 		if self.resized {
 			let buf = render_ctx
 				.device
@@ -220,8 +226,11 @@ impl Brush {
 			.tessellate_path(
 				path,
 				&FillOptions::default(),
-				&mut BuffersBuilder::new(&mut geometry, |vertex: FillVertex| Vertex {
-					pos: vertex.position().to_array(),
+				&mut BuffersBuilder::new(&mut geometry, |vertex: FillVertex| {
+					let v = vertex.position();
+					Vertex {
+						pos: [v.x, v.y, depth],
+					}
 				}),
 			)
 			.unwrap(); // TODO: remove this
@@ -254,7 +263,14 @@ impl Brush {
 						store: true,
 					},
 				}],
-				depth_stencil_attachment: None,
+				depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+					view: &render_ctx.depth_view,
+					depth_ops: Some(wgpu::Operations {
+						load: wgpu::LoadOp::Load,
+						store: true,
+					}),
+					stencil_ops: None,
+				}),
 			});
 
 		rpass.set_pipeline(&self.pipeline);

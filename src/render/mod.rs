@@ -3,7 +3,7 @@ use winit::{dpi::PhysicalSize, window::Window};
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Vertex {
-	pub pos: [f32; 2],
+	pub pos: [f32; 3],
 }
 
 unsafe impl bytemuck::Pod for Vertex {}
@@ -18,6 +18,7 @@ pub struct Renderer {
 	pub staging_belt: wgpu::util::StagingBelt,
 	pub local_pool: futures::executor::LocalPool,
 	pub local_spawner: futures::executor::LocalSpawner,
+	pub depth_view: wgpu::TextureView,
 }
 
 impl Renderer {
@@ -35,14 +36,7 @@ impl Renderer {
 			.unwrap();
 
 		let (device, queue) = adapter
-			.request_device(
-				&wgpu::DeviceDescriptor {
-					label: None,
-					features: wgpu::Features::empty(),
-					limits: wgpu::Limits::downlevel_defaults().using_resolution(adapter.limits()),
-				},
-				None,
-			)
+			.request_device(&wgpu::DeviceDescriptor::default(), None)
 			.await
 			.expect("Failed to create device");
 
@@ -53,10 +47,12 @@ impl Renderer {
 			format: swapchain_format,
 			width: size.width,
 			height: size.height,
-			present_mode: wgpu::PresentMode::Mailbox,
+			present_mode: wgpu::PresentMode::Fifo,
 		};
 
 		surface.configure(&device, &surface_cfg);
+
+		let depth_view = create_depth_texture(&device, size);
 
 		let staging_belt = wgpu::util::StagingBelt::new(1024);
 		let local_pool = futures::executor::LocalPool::new();
@@ -71,6 +67,7 @@ impl Renderer {
 			staging_belt,
 			local_pool,
 			local_spawner,
+			depth_view,
 		}
 	}
 
@@ -79,12 +76,32 @@ impl Renderer {
 		self.surface_cfg.width = size.width;
 		self.surface_cfg.height = size.height;
 		self.surface.configure(&self.device, &self.surface_cfg);
+		self.depth_view = create_depth_texture(&self.device, size);
 	}
+}
+
+fn create_depth_texture(device: &wgpu::Device, size: PhysicalSize<u32>) -> wgpu::TextureView {
+	let depth_texture = device.create_texture(&wgpu::TextureDescriptor {
+		label: Some("Depth buffer"),
+		size: wgpu::Extent3d {
+			width: size.width,
+			height: size.height,
+			depth_or_array_layers: 1,
+		},
+		mip_level_count: 1,
+		sample_count: 1,
+		dimension: wgpu::TextureDimension::D2,
+		format: wgpu::TextureFormat::Depth32Float,
+		usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+	});
+
+	depth_texture.create_view(&wgpu::TextureViewDescriptor::default())
 }
 
 pub fn next_frame<'a>(
 	device: &'a mut wgpu::Device,
 	surface: &'a mut wgpu::Surface,
+	depth_view: &'a wgpu::TextureView,
 	size: winit::dpi::PhysicalSize<u32>,
 	staging_belt: &'a mut wgpu::util::StagingBelt,
 	local_pool: &'a mut futures::executor::LocalPool,
@@ -117,7 +134,14 @@ pub fn next_frame<'a>(
 				store: true,
 			},
 		}],
-		depth_stencil_attachment: None,
+		depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+			view: depth_view,
+			depth_ops: Some(wgpu::Operations {
+				load: wgpu::LoadOp::Clear(1.0),
+				store: true,
+			}),
+			stencil_ops: None,
+		}),
 	});
 
 	RenderCtx {
@@ -125,6 +149,7 @@ pub fn next_frame<'a>(
 		encoder,
 		surface_tex,
 		view,
+		depth_view,
 		size,
 		staging_belt,
 		local_pool,
@@ -149,6 +174,7 @@ pub struct RenderCtx<'a> {
 	pub encoder: wgpu::CommandEncoder,
 	pub surface_tex: wgpu::SurfaceTexture,
 	pub view: wgpu::TextureView,
+	pub depth_view: &'a wgpu::TextureView,
 	pub size: winit::dpi::PhysicalSize<u32>,
 	pub staging_belt: &'a mut wgpu::util::StagingBelt,
 	local_pool: &'a mut futures::executor::LocalPool,

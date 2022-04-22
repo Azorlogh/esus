@@ -19,7 +19,9 @@ pub enum DrawMode {
 impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 	pub fn fill(&mut self, path: &Path, color: Color) {
 		self.painter.brush.set_color(self.render_ctx, color);
-		self.painter.brush.fill(self.render_ctx, path);
+		self.painter
+			.brush
+			.fill(self.render_ctx, path, self.layout.depth);
 	}
 
 	pub fn print(&mut self, rect: Rect, text: &str, color: Color) {
@@ -27,7 +29,8 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 			.add_text(
 				wgpu_glyph::Text::new(text)
 					.with_color(color.0)
-					.with_scale(20.0),
+					.with_scale(20.0)
+					.with_z(1.0 / (2.0 + self.layout.depth)),
 			)
 			.with_screen_position(rect.center())
 			.with_bounds(rect.size)
@@ -45,6 +48,14 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 				&mut self.render_ctx.staging_belt,
 				&mut self.render_ctx.encoder,
 				&self.render_ctx.view,
+				wgpu::RenderPassDepthStencilAttachment {
+					view: &self.render_ctx.depth_view,
+					depth_ops: Some(wgpu::Operations {
+						load: wgpu::LoadOp::Load,
+						store: true,
+					}),
+					stencil_ops: None,
+				},
 				self.render_ctx.size.width,
 				self.render_ctx.size.height,
 			)
