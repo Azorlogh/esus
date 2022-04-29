@@ -18,6 +18,9 @@ pub use size::SizeCtx;
 pub mod layout;
 pub use layout::LayoutCtx;
 
+pub mod hit;
+pub use hit::HitCtx;
+
 pub mod pod;
 pub use pod::Pod;
 
@@ -26,7 +29,12 @@ pub use ext::WidgetExt;
 
 pub trait Widget: std::fmt::Debug {
 	type S: State;
-	// for event handling
+
+	fn hit(&mut self, _ctx: &HitCtx<Self::S>) -> Option<f32> {
+		log::warn!("using default hit");
+		None
+	}
+
 	fn event(&mut self, _ctx: &mut EventCtx<Self::S>) {}
 
 	fn size(&mut self, ctx: &mut SizeCtx<Self::S>) -> Size {
@@ -46,6 +54,6 @@ pub mod prelude {
 	pub use crate::{
 		event::Event,
 		widget::{self, EventCtx, Id, LayoutCtx, PaintCtx, SizeCtx, Widget},
-		Layout, Rect, Size, SizeConstraints, Vector,
+		Align, Align2, Color, Layout, Rect, Size, SizeConstraints, Vector,
 	};
 }

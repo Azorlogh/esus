@@ -51,8 +51,12 @@ impl<S: 'static> Label<S> {
 impl<S: State> Widget for Label<S> {
 	type S = S;
 
+	fn hit(&mut self, _ctx: &widget::HitCtx<S>) -> Option<f32> {
+		None
+	}
+
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
-		ctx.sc.max
+		ctx.measure_text(Rect::from_size(ctx.sc.max), &self.text.resolve(ctx.state))
 	}
 
 	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {

@@ -1,6 +1,7 @@
 use crate::{
+	event::Event,
 	state::State,
-	widget::{self, LayoutCtx, PaintCtx, SizeCtx, Widget},
+	widget::{self, HitCtx, LayoutCtx, PaintCtx, SizeCtx, Widget},
 	Axis, Layout, Point, Rect, Size, SizeConstraints,
 };
 
@@ -50,13 +51,10 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 		let mut minor_size = 0.0;
 		for child in &mut self.children {
 			if child.flex == 0.0 {
-				let mut ctx = SizeCtx::new(
-					ctx.state,
-					SizeConstraints {
-						min: Size::new(0.0, 0.0),
-						max: ctx.sc.max,
-					},
-				);
+				let mut ctx = ctx.clone_with_size_constraints(SizeConstraints {
+					min: Size::new(0.0, 0.0),
+					max: ctx.sc.max,
+				});
 				let minor = self.axis.minor(child.widget.size(&mut ctx));
 				if minor > minor_size {
 					minor_size = minor;
@@ -113,9 +111,62 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 		suggestion
 	}
 
+	fn hit(&mut self, ctx: &HitCtx<S>) -> Option<f32> {
+		self.children
+			.iter_mut()
+			.map(|child| {
+				let hit = child.widget.hit(ctx);
+				hit
+			})
+			.fold(None, |a, b| match (a, b) {
+				(Some(a), Some(b)) => Some(a.max(b)),
+				(Some(a), None) => Some(a),
+				(None, Some(b)) => Some(b),
+				(None, None) => None,
+			})
+	}
+
 	fn event(&mut self, ctx: &mut widget::EventCtx<S>) {
-		for child in &mut self.children {
-			child.widget.event(ctx);
+		match ctx.event {
+			Event::MouseDown(_) => {
+				let hit = self.children.iter_mut().enumerate().fold(
+					None,
+					|acc: Option<(usize, f32)>, (idx, child)| {
+						let mut hit_ctx = HitCtx::new(
+							ctx.state,
+							child.widget.layout.unwrap(),
+							ctx.devices.mouse.pos,
+						);
+						let hit = child.widget.hit(&mut hit_ctx);
+
+						match hit {
+							None => acc,
+							Some(depth) => match acc {
+								None => Some((idx, depth)),
+								Some((_, acc_depth)) => {
+									if depth > acc_depth {
+										Some((idx, depth))
+									} else {
+										acc
+									}
+								}
+							},
+						}
+					},
+				);
+				match hit {
+					None => {}
+					Some((idx, _)) => {
+						let child = &mut self.children[idx];
+						child.widget.event(ctx);
+					}
+				}
+			}
+			_ => {
+				for child in &mut self.children {
+					child.widget.event(ctx);
+				}
+			}
 		}
 	}
 

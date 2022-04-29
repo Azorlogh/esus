@@ -5,8 +5,7 @@ use lyon::{
 
 use crate::{
 	state::State,
-	widget::{self, EventCtx, LayoutCtx, PaintCtx, SizeCtx, Widget},
-	Color, Layout, Size,
+	widget::{self, prelude::*, EventCtx, LayoutCtx, PaintCtx, SizeCtx, Widget},
 };
 
 #[derive(Debug)]
@@ -16,6 +15,7 @@ pub struct SizedBox<S: State> {
 	height: Option<f32>,
 	padding: Option<f32>,
 	background: Option<Color>,
+	align: Align2,
 }
 
 impl<S: State> SizedBox<S> {
@@ -26,6 +26,7 @@ impl<S: State> SizedBox<S> {
 			height: None,
 			padding: None,
 			background: None,
+			align: Align2::default(),
 		};
 		id
 	}
@@ -49,10 +50,29 @@ impl<S: State> SizedBox<S> {
 		self.background = Some(background);
 		self
 	}
+
+	pub fn align_horizontal(mut self, align: Align) -> Self {
+		self.align.x = align;
+		self
+	}
+
+	pub fn align_vertical(mut self, align: Align) -> Self {
+		self.align.y = align;
+		self
+	}
+
+	pub fn align(mut self, align: Align2) -> Self {
+		self.align = align;
+		self
+	}
 }
 
 impl<S: State> Widget for SizedBox<S> {
 	type S = S;
+
+	fn hit(&mut self, _ctx: &widget::HitCtx<S>) -> Option<f32> {
+		None
+	}
 
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
 		if let Some(width) = self.width {
@@ -64,22 +84,53 @@ impl<S: State> Widget for SizedBox<S> {
 		if let Some(padding) = self.padding {
 			ctx.sc.max -= Size::new(padding * 2.0, padding * 2.0);
 		}
-		if let Some(child) = &mut self.child {
+		let size = if let Some(child) = &mut self.child {
 			child.size(ctx)
 		} else {
 			ctx.sc.max
-		}
+		};
+		size
 	}
 
 	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
-		if let Some(child) = &mut self.child {
-			if let Some(padding) = self.padding {
-				ctx.suggestion.rect = ctx
-					.suggestion
-					.rect
-					.inner_rect(SideOffsets2D::new_all_same(padding));
+		let mut origin = ctx.suggestion.rect.origin;
+		let suggestion_size = ctx.suggestion.rect.size;
+		let target_size = Size::new(
+			self.width.unwrap_or(suggestion_size.width) - self.padding.unwrap_or(0.0) * 2.0,
+			self.height.unwrap_or(suggestion_size.height) - self.padding.unwrap_or(0.0) * 2.0,
+		);
+
+		match self.align.x {
+			Align::Min => {}
+			Align::Center => {
+				origin.x = origin.x + (suggestion_size.width - target_size.width) / 2.0;
 			}
-			child.layout(ctx);
+			Align::Max => {
+				origin.x = origin.x + suggestion_size.width - target_size.width;
+			}
+		}
+
+		match self.align.y {
+			Align::Min => {}
+			Align::Center => {
+				origin.y = origin.y + (suggestion_size.height - target_size.height) / 2.0;
+			}
+			Align::Max => {
+				origin.y = origin.y + suggestion_size.height - target_size.height;
+			}
+		}
+
+		let layout = Layout {
+			rect: Rect {
+				origin,
+				size: target_size,
+			},
+			depth: ctx.suggestion.depth,
+		};
+
+		if let Some(child) = &mut self.child {
+			let child_ctx = ctx.clone_with_layout(layout);
+			child.layout(&mut child_ctx);
 		}
 		ctx.suggestion
 	}

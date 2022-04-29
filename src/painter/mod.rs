@@ -1,12 +1,16 @@
-use crate::render::{RenderCtx, Renderer};
+use crate::{
+	render::{RenderCtx, Renderer},
+	Rect, Size,
+};
 
 use wgpu::DepthStencilState;
-use wgpu_glyph::{GlyphBrush, GlyphBrushBuilder};
+use wgpu_glyph::{GlyphBrush, GlyphBrushBuilder, GlyphCruncher};
 
 mod brush;
 use brush::Brush;
 use winit::dpi::PhysicalSize;
 
+#[derive(Debug)]
 pub struct Painter {
 	pub brush: Brush,
 	pub glyph_brush: GlyphBrush<DepthStencilState>,
@@ -35,5 +39,15 @@ impl Painter {
 
 	pub fn resize(&mut self, size: PhysicalSize<u32>) {
 		self.brush.resize(size);
+	}
+
+	pub fn measure_text(&self, rect: Rect, text: &str) -> Size {
+		let section =
+			wgpu_glyph::Section::default().add_text(wgpu_glyph::Text::new(text).with_scale(20.0));
+		if let Some(bounds) = self.glyph_brush.glyph_bounds(section) {
+			Size::new(bounds.width().ceil(), bounds.height().ceil())
+		} else {
+			Size::zero()
+		}
 	}
 }

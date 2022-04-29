@@ -41,12 +41,9 @@ fn main() {
 		})
 		.with_view({
 			Flex::column()
-				.with_child(
-					Flex::row().with_child(
-						DropDown::new(Button::new(Label::new("aaa")))
-							.fix_height(30.0)
-							.fix_width(100.0),
-					),
+				.with_flex_child(
+					1.0,
+					Flex::row().with_child(DropDown::new(Button::new(Label::new("aaa")))),
 				)
 				.with_flex_child(
 					1.0,
@@ -65,28 +62,28 @@ fn main() {
 								.fix_height(100.0),
 						),
 				)
-				.with_flex_child(
-					1.0,
-					Flex::row()
-						.with_flex_child(
-							1.0,
-							Button::empty()
-								.on_click(Message::Increment2)
-								.with_color(Color([1.0, 0.3, 1.0, 1.0])),
-						)
-						.with_flex_child(
-							1.0,
-							Label::new(LabelText::Dynamic(Box::new(|s: &State| {
-								format!("{}", s.count2)
-							}))),
-						)
-						.with_flex_child(
-							1.0,
-							Button::empty()
-								.on_click(Message::Decrement2)
-								.with_color(Color([1.0, 0.0, 1.0, 1.0])),
-						),
-				)
+			// .with_flex_child(
+			// 	1.0,
+			// 	Flex::row()
+			// 		.with_flex_child(
+			// 			1.0,
+			// 			Button::empty()
+			// 				.on_click(Message::Increment2)
+			// 				.with_color(Color([1.0, 0.3, 1.0, 1.0])),
+			// 		)
+			// 		.with_flex_child(
+			// 			1.0,
+			// 			Label::new(LabelText::Dynamic(Box::new(|s: &State| {
+			// 				format!("{}", s.count2)
+			// 			}))),
+			// 		)
+			// 		.with_flex_child(
+			// 			1.0,
+			// 			Button::empty()
+			// 				.on_click(Message::Decrement2)
+			// 				.with_color(Color([1.0, 0.0, 1.0, 1.0])),
+			// 		),
+			// )
 		})
 		.build();
 

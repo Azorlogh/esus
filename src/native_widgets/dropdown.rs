@@ -88,6 +88,10 @@ impl<S: State + 'static> Widget for DropDown<S> {
 		}
 	}
 
+	fn hit(&mut self, ctx: &widget::HitCtx<Self::S>) -> Option<f32> {
+		None
+	}
+
 	fn event(&mut self, ctx: &mut EventCtx<S>) {
 		match ctx.event {
 			Event::MouseDown(_) => {

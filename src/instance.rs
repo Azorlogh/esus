@@ -97,6 +97,7 @@ impl<S: State> Builder<S> {
 					rect: Rect::from_size(Size::new(size.width as f32, size.height as f32)),
 					depth: 0.0,
 				},
+				&mut painter,
 			);
 			view.layout(&mut ctx);
 		}
@@ -175,6 +176,7 @@ impl<S: State> Instance<S> {
 								)),
 								depth: 0.0,
 							},
+							painter,
 						);
 						view.layout(&mut ctx);
 					}
@@ -193,6 +195,7 @@ impl<S: State> Instance<S> {
 								)),
 								depth: 0.0,
 							},
+							painter,
 						);
 						view.layout(&mut ctx);
 					}

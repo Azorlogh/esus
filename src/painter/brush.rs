@@ -37,6 +37,7 @@ fn make_matrix(width: u32, height: u32) -> cgmath::Matrix4<f32> {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct Brush {
 	shader: wgpu::ShaderModule,
 	transform_buf: wgpu::Buffer,

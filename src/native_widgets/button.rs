@@ -1,6 +1,10 @@
 use lyon::path::{builder::BorderRadii, traits::PathBuilder, Winding};
 
-use crate::{state::State, widget::prelude::*, Color};
+use crate::{
+	state::State,
+	widget::{prelude::*, HitCtx},
+	Color,
+};
 
 #[derive(Debug)]
 pub struct Button<S: State> {
@@ -44,6 +48,15 @@ impl<S: State> Widget for Button<S> {
 		} else {
 			ctx.sc.max
 		}
+	}
+
+	fn hit(&mut self, ctx: &HitCtx<S>) -> Option<f32> {
+		Some(
+			self.child
+				.as_mut()
+				.and_then(|child| child.hit(ctx))
+				.unwrap_or(ctx.layout.depth),
+		)
 	}
 
 	fn layout(&mut self, ctx: &mut LayoutCtx<Self::S>) -> Layout {

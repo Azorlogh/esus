@@ -1,28 +1,26 @@
-use crate::SizeConstraints;
+use crate::{painter::Painter, Rect, Size, SizeConstraints};
 
 #[derive(Debug)]
 pub struct SizeCtx<'a, S> {
 	pub state: &'a S,
 	pub sc: SizeConstraints,
+	painter: &'a mut Painter,
 }
 
 impl<'a, S> SizeCtx<'a, S> {
-	pub fn new(state: &'a S, sc: SizeConstraints) -> SizeCtx<'a, S> {
-		SizeCtx { state, sc }
+	pub fn new(state: &'a S, sc: SizeConstraints, painter: &'a mut Painter) -> SizeCtx<'a, S> {
+		SizeCtx { state, sc, painter }
 	}
 
-	// pub fn get_size(&mut self, id: widget::Id, sc: SizeConstraints) -> Size {
-	// 	let mut child = self
-	// 		.pool
-	// 		.widgets
-	// 		.remove(&id)
-	// 		.expect("tried to get size of non-existent widget");
-	// 	let mut ctx = SizeCtx {
-	// 		state: self.state,
-	// 		sc,
-	// 	};
-	// 	let size = child.size(&mut ctx);
-	// 	self.pool.widgets.insert(id, child);
-	// 	size
-	// }
+	pub fn clone_with_size_constraints(mut self, sc: SizeConstraints) -> SizeCtx<'a, S> {
+		SizeCtx {
+			state: self.state,
+			sc,
+			painter: self.painter,
+		}
+	}
+
+	pub fn measure_text(&self, rect: Rect, text: &str) -> Size {
+		self.painter.measure_text(rect, text)
+	}
 }
