@@ -59,7 +59,7 @@ impl<S: State> Widget for Label<S> {
 		ctx.measure_text(Rect::from_size(ctx.sc.max), &self.text.resolve(ctx.state))
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
+	fn layout(&mut self, ctx: LayoutCtx<S>) -> Layout {
 		ctx.suggestion
 	}
 

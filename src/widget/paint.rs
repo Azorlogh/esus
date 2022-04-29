@@ -24,7 +24,7 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 			.fill(self.render_ctx, path, self.layout.depth);
 	}
 
-	pub fn measure_text(&self, rect: Rect, text: &str) -> Size {
+	pub fn measure_text(&mut self, rect: Rect, text: &str) -> Size {
 		self.painter.measure_text(rect, text)
 	}
 

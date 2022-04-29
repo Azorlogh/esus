@@ -43,7 +43,8 @@ fn main() {
 			Flex::column()
 				.with_flex_child(
 					1.0,
-					Flex::row().with_child(DropDown::new(Button::new(Label::new("aaa")))),
+					Flex::row() //.with_child(DropDown::new(Button::new(Label::new("aaa")))),
+						.with_child(Button::new(Label::new("aaa")).on_click(Message::Increment)),
 				)
 				.with_flex_child(
 					1.0,

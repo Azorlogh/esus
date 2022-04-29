@@ -42,7 +42,7 @@ pub trait Widget: std::fmt::Debug {
 	}
 
 	// to inform the instance of this widget's Layout
-	fn layout(&mut self, ctx: &mut LayoutCtx<Self::S>) -> Layout {
+	fn layout(&mut self, ctx: LayoutCtx<Self::S>) -> Layout {
 		ctx.suggestion
 	}
 

@@ -53,21 +53,17 @@ impl<S: State + 'static> Widget for DropDown<S> {
 		}
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<Self::S>) -> Layout {
+	fn layout(&mut self, mut ctx: LayoutCtx<Self::S>) -> Layout {
 		let mut rect = ctx.suggestion.rect;
 		if let Some(child) = &mut self.child {
-			let mut ctx = LayoutCtx::new(ctx.state, ctx.suggestion);
-			child.layout(&mut ctx);
+			child.layout(ctx.clone_with_layout(ctx.suggestion));
 			let child_layout = child.layout.unwrap();
 			rect = child_layout.rect;
 			if let Some(menu) = &mut self.menu {
-				let mut menu_size_ctx = SizeCtx {
-					state: ctx.state,
-					sc: SizeConstraints {
-						min: Size::new(0.0, 0.0),
-						max: Size::new(200.0, 400.0),
-					},
-				};
+				let mut menu_size_ctx = ctx.create_size_context(SizeConstraints {
+					min: Size::new(0.0, 0.0),
+					max: Size::new(200.0, 400.0),
+				});
 				let menu_size = menu.size(&mut menu_size_ctx);
 				let menu_suggestion = Layout {
 					rect: Rect::new(
@@ -76,8 +72,7 @@ impl<S: State + 'static> Widget for DropDown<S> {
 					),
 					depth: ctx.suggestion.depth + 1.0,
 				};
-				let mut ctx = LayoutCtx::new(ctx.state, menu_suggestion);
-				menu.layout(&mut ctx);
+				menu.layout(ctx.clone_with_layout(menu_suggestion));
 				rect = rect.union(&menu.layout.unwrap().rect);
 			}
 		}
@@ -88,7 +83,7 @@ impl<S: State + 'static> Widget for DropDown<S> {
 		}
 	}
 
-	fn hit(&mut self, ctx: &widget::HitCtx<Self::S>) -> Option<f32> {
+	fn hit(&mut self, _ctx: &widget::HitCtx<Self::S>) -> Option<f32> {
 		None
 	}
 

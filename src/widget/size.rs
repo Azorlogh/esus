@@ -12,7 +12,7 @@ impl<'a, S> SizeCtx<'a, S> {
 		SizeCtx { state, sc, painter }
 	}
 
-	pub fn clone_with_size_constraints(mut self, sc: SizeConstraints) -> SizeCtx<'a, S> {
+	pub fn clone_with_size_constraints<'b>(&'b mut self, sc: SizeConstraints) -> SizeCtx<'b, S> {
 		SizeCtx {
 			state: self.state,
 			sc,
@@ -20,7 +20,7 @@ impl<'a, S> SizeCtx<'a, S> {
 		}
 	}
 
-	pub fn measure_text(&self, rect: Rect, text: &str) -> Size {
+	pub fn measure_text(&mut self, rect: Rect, text: &str) -> Size {
 		self.painter.measure_text(rect, text)
 	}
 }

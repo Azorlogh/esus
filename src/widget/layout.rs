@@ -19,10 +19,7 @@ impl<'a, S: State> LayoutCtx<'a, S> {
 		}
 	}
 
-	pub fn clone_with_layout<'b>(&'a mut self, layout: Layout) -> LayoutCtx<'b, S>
-	where
-		'a: 'b,
-	{
+	pub fn clone_with_layout<'b>(&'b mut self, layout: Layout) -> LayoutCtx<'b, S> {
 		LayoutCtx {
 			state: self.state,
 			suggestion: layout,
@@ -30,10 +27,7 @@ impl<'a, S: State> LayoutCtx<'a, S> {
 		}
 	}
 
-	pub fn create_size_context<'b>(&'a mut self, sc: SizeConstraints) -> SizeCtx<'b, S>
-	where
-		'a: 'b,
-	{
+	pub fn create_size_context<'b>(&'b mut self, sc: SizeConstraints) -> SizeCtx<'b, S> {
 		SizeCtx::new(self.state, sc, self.painter)
 	}
 }

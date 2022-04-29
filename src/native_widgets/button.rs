@@ -59,9 +59,9 @@ impl<S: State> Widget for Button<S> {
 		)
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<Self::S>) -> Layout {
+	fn layout(&mut self, mut ctx: LayoutCtx<Self::S>) -> Layout {
 		if let Some(child) = &mut self.child {
-			child.layout(ctx);
+			child.layout(ctx.clone_with_layout(ctx.suggestion));
 		}
 		ctx.suggestion
 	}

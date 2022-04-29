@@ -84,7 +84,7 @@ impl<S: State> Builder<S> {
 		// }
 		let window = window_builder.build(&event_loop).unwrap();
 		let renderer = futures::executor::block_on(Renderer::new(&window));
-		let painter = Painter::new(&renderer);
+		let mut painter = Painter::new(&renderer);
 
 		let mut state = self.state.expect("no state was provided");
 		let mut view = self.view.unwrap();
@@ -99,7 +99,7 @@ impl<S: State> Builder<S> {
 				},
 				&mut painter,
 			);
-			view.layout(&mut ctx);
+			view.layout(ctx);
 		}
 
 		Instance {
@@ -178,7 +178,7 @@ impl<S: State> Instance<S> {
 							},
 							painter,
 						);
-						view.layout(&mut ctx);
+						view.layout(ctx);
 					}
 				}
 				wevent::Event::MainEventsCleared => {}
@@ -197,7 +197,7 @@ impl<S: State> Instance<S> {
 							},
 							painter,
 						);
-						view.layout(&mut ctx);
+						view.layout(ctx);
 					}
 					println!("drawing");
 					let mut render_ctx = render::next_frame(

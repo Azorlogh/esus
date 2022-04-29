@@ -64,7 +64,7 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 		self.axis.with_minor(ctx.sc.max, minor_size)
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
+	fn layout(&mut self, mut ctx: LayoutCtx<S>) -> Layout {
 		let suggestion = ctx.suggestion;
 		let size = suggestion.rect.size;
 		let constraints = SizeConstraints {
@@ -77,7 +77,7 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 		for child in &mut self.children {
 			flex_total += child.flex;
 			if child.flex == 0.0 {
-				let mut ctx = SizeCtx::new(ctx.state, constraints);
+				let mut ctx = ctx.create_size_context(constraints);
 				let size = child.widget.size(&mut ctx);
 				remaining_major -= self.axis.major(size);
 			}
@@ -87,24 +87,21 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 		let mut curr_major = 0.0;
 		for child in &mut self.children {
 			let size = if child.flex == 0.0 {
-				let mut ctx = SizeCtx::new(ctx.state, constraints);
+				let mut ctx = ctx.create_size_context(constraints);
 				child.widget.size(&mut ctx)
 			} else {
 				self.axis
 					.with_major(size, remaining_major * (child.flex / flex_total))
 			};
-			let mut ctx = LayoutCtx::new(
-				ctx.state,
-				Layout {
-					rect: Rect {
-						origin: self.axis.with_major(Point::origin(), curr_major)
-							+ suggestion.rect.origin.to_vector(),
-						size,
-					},
-					depth: 0.0,
+			let ctx = ctx.clone_with_layout(Layout {
+				rect: Rect {
+					origin: self.axis.with_major(Point::origin(), curr_major)
+						+ suggestion.rect.origin.to_vector(),
+					size,
 				},
-			);
-			child.widget.layout(&mut ctx);
+				depth: 0.0,
+			});
+			child.widget.layout(ctx);
 			curr_major += self.axis.major(size);
 		}
 

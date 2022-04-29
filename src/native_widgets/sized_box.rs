@@ -92,7 +92,7 @@ impl<S: State> Widget for SizedBox<S> {
 		size
 	}
 
-	fn layout(&mut self, ctx: &mut LayoutCtx<S>) -> Layout {
+	fn layout(&mut self, mut ctx: LayoutCtx<S>) -> Layout {
 		let mut origin = ctx.suggestion.rect.origin;
 		let suggestion_size = ctx.suggestion.rect.size;
 		let target_size = Size::new(
@@ -129,8 +129,7 @@ impl<S: State> Widget for SizedBox<S> {
 		};
 
 		if let Some(child) = &mut self.child {
-			let child_ctx = ctx.clone_with_layout(layout);
-			child.layout(&mut child_ctx);
+			child.layout(ctx.clone_with_layout(layout));
 		}
 		ctx.suggestion
 	}

@@ -61,7 +61,7 @@ impl<S: State> Pod<S> {
 		self.inner.size(ctx)
 	}
 
-	pub fn layout(&mut self, ctx: &mut LayoutCtx<S>) {
+	pub fn layout(&mut self, ctx: LayoutCtx<S>) {
 		let layout = self.inner.layout(ctx);
 		self.layout = Some(layout);
 	}
