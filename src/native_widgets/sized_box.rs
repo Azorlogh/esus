@@ -1,7 +1,4 @@
-use lyon::{
-	geom::euclid::SideOffsets2D,
-	path::{traits::PathBuilder, Winding},
-};
+use lyon::path::{traits::PathBuilder, Winding};
 
 use crate::{
 	state::State,

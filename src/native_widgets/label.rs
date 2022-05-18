@@ -24,6 +24,10 @@ impl<S> From<&str> for LabelText<S> {
 }
 
 impl<S> LabelText<S> {
+	pub fn new_dynamic(c: impl Fn(&S) -> String + 'static) -> Self {
+		Self::Dynamic(Box::new(c))
+	}
+
 	pub fn resolve(&self, s: &S) -> String {
 		match self {
 			LabelText::Specific(s) => s.clone(),

@@ -15,3 +15,9 @@ pub use empty::*;
 
 mod sized_box;
 pub use sized_box::SizedBox;
+
+mod checkbox;
+pub use checkbox::Checkbox;
+
+mod adapter;
+pub use adapter::Adapter;

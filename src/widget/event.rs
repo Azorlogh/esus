@@ -5,8 +5,8 @@ pub struct EventCtx<'a, S: State> {
 	pub state: &'a S,
 	pub event: &'a Event,
 	pub devices: &'a DeviceStates,
-	redraw_requested: &'a mut bool,
-	msg_queue: &'a mut VecDeque<S::Message>,
+	pub(crate) redraw_requested: &'a mut bool,
+	pub(crate) msg_queue: &'a mut VecDeque<S::Message>,
 }
 
 impl<'a, S: State> EventCtx<'a, S> {

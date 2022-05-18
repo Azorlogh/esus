@@ -1,8 +1,6 @@
-use lyon::path::{builder::BorderRadii, traits::PathBuilder, Winding};
-
 use crate::{state::State, widget::prelude::*, Color};
 
-use super::{Button, Label};
+use super::Button;
 
 #[derive(Debug)]
 pub struct DropDown<S: State> {

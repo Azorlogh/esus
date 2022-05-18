@@ -7,7 +7,7 @@ use super::SizeCtx;
 pub struct LayoutCtx<'a, S: State> {
 	pub state: &'a S,
 	pub suggestion: Layout,
-	painter: &'a mut Painter,
+	pub(crate) painter: &'a mut Painter,
 }
 
 impl<'a, S: State> LayoutCtx<'a, S> {

@@ -13,6 +13,14 @@ pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
 	fn with_padding(self, padding: f32) -> SizedBox<S> {
 		SizedBox::new(self).with_padding(padding)
 	}
+
+	fn adapt<SP: State>(
+		self,
+		from_state: impl Fn(&SP) -> S + 'static,
+		to_message: impl Fn(S::Message) -> SP::Message + 'static,
+	) -> Adapter<S, SP> {
+		Adapter::new(self, from_state, to_message)
+	}
 }
 
 impl<S: State, W: Widget<S = S> + 'static> WidgetExt<S> for W {}

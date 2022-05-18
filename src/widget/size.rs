@@ -4,7 +4,7 @@ use crate::{painter::Painter, Rect, Size, SizeConstraints};
 pub struct SizeCtx<'a, S> {
 	pub state: &'a S,
 	pub sc: SizeConstraints,
-	painter: &'a mut Painter,
+	pub(crate) painter: &'a mut Painter,
 }
 
 impl<'a, S> SizeCtx<'a, S> {
