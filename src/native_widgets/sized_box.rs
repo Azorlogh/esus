@@ -1,3 +1,5 @@
+use std::f32::INFINITY;
+
 use lyon::path::{traits::PathBuilder, Winding};
 
 use crate::{
@@ -38,6 +40,22 @@ impl<S: State> SizedBox<S> {
 		self
 	}
 
+	pub fn expand_width(mut self) -> Self {
+		self.width = Some(INFINITY);
+		self
+	}
+
+	pub fn expand_height(mut self) -> Self {
+		self.height = Some(INFINITY);
+		self
+	}
+
+	pub fn expand(mut self) -> Self {
+		self.width = Some(INFINITY);
+		self.height = Some(INFINITY);
+		self
+	}
+
 	pub fn with_padding(mut self, padding: f32) -> Self {
 		self.padding = Some(padding);
 		self
@@ -73,11 +91,14 @@ impl<S: State> Widget for SizedBox<S> {
 
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
 		if let Some(width) = self.width {
-			ctx.sc.max.width = ctx.sc.max.width.min(width);
+			ctx.sc.max.width = width.min(ctx.sc.max.width).max(ctx.sc.min.width);
+			ctx.sc.min.width = ctx.sc.max.width
 		}
 		if let Some(height) = self.height {
-			ctx.sc.max.height = ctx.sc.max.height.min(height);
+			ctx.sc.max.height = height.min(ctx.sc.max.height).max(ctx.sc.min.height);
+			ctx.sc.min.height = ctx.sc.max.height
 		}
+		log::error!("{:?}", ctx.sc);
 		if let Some(padding) = self.padding {
 			ctx.sc.max -= Size::new(padding * 2.0, padding * 2.0);
 		}
@@ -93,8 +114,8 @@ impl<S: State> Widget for SizedBox<S> {
 		let mut origin = ctx.suggestion.rect.origin;
 		let suggestion_size = ctx.suggestion.rect.size;
 		let target_size = Size::new(
-			self.width.unwrap_or(suggestion_size.width) - self.padding.unwrap_or(0.0) * 2.0,
-			self.height.unwrap_or(suggestion_size.height) - self.padding.unwrap_or(0.0) * 2.0,
+			suggestion_size.width - self.padding.unwrap_or(0.0) * 2.0,
+			suggestion_size.height - self.padding.unwrap_or(0.0) * 2.0,
 		);
 
 		match self.align.x {

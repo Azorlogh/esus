@@ -10,6 +10,18 @@ pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
 		SizedBox::new(self).fix_height(height)
 	}
 
+	fn expand_width(self) -> SizedBox<S> {
+		SizedBox::new(self).expand_width()
+	}
+
+	fn expand_height(self) -> SizedBox<S> {
+		SizedBox::new(self).expand_height()
+	}
+
+	fn expand(self) -> SizedBox<S> {
+		SizedBox::new(self).expand()
+	}
+
 	fn with_padding(self, padding: f32) -> SizedBox<S> {
 		SizedBox::new(self).with_padding(padding)
 	}

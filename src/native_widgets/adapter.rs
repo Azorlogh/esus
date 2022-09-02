@@ -7,7 +7,7 @@ use crate::{
 
 pub struct Adapter<SFrom: State, STo: State> {
 	child: widget::Pod<SFrom>,
-	from_state: Box<dyn Fn(&STo) -> SFrom>,
+	from_state: Box<dyn for<'a> Fn(&'a STo) -> SFrom>,
 	to_message: Box<dyn Fn(SFrom::Message) -> STo::Message>,
 	_from: PhantomData<SFrom>,
 	_to: PhantomData<STo>,
