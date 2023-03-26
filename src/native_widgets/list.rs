@@ -29,10 +29,9 @@ pub struct ListMessage<M> {
 /// State
 
 #[derive(Debug)]
-pub struct ListState<T, I>(pub T, pub PhantomData<I>)
+pub struct ListState<T, I>(pub T, PhantomData<I>)
 where
-	T: Debug,
-	T: Iterator,
+	T: Debug + Iterator,
 	T::Item: Borrow<I>,
 	I: State;
 
@@ -42,25 +41,28 @@ where
 	T: Iterator,
 	T::Item: Borrow<I>,
 	I: State,
-	I::Message: std::fmt::Debug,
 {
 	type Message = ListMessage<I::Message>;
 }
 
-pub struct List<S, I: State> {
+pub struct List<I> {
 	create_widget: Box<dyn Fn() -> Box<dyn Widget<S = I>>>,
 	// create_message: Box<dyn Fn(usize, I::Message) -> S::Message>,
 	children: Vec<widget::Pod<I>>,
-	phantom: PhantomData<S>,
+	// phantom: PhantomData<S>,
 }
 
-impl<S, I: State> std::fmt::Debug for List<S, I> {
+impl<I> std::fmt::Debug for List<I> {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.debug_struct("List").finish()
 	}
 }
 
-impl<S, I: State> List<S, I> {
+impl<I> List<I>
+where
+	// S: AsRef<dyn Iterator<Item = I>>,
+	I: State,
+{
 	pub fn new<W: Widget<S = I> + 'static>(
 		create_widget: impl Fn() -> W + 'static,
 		// create_message: impl Fn(usize, I::Message) -> S::Message + 'static,
@@ -68,20 +70,18 @@ impl<S, I: State> List<S, I> {
 		Self {
 			create_widget: Box::new(move || Box::new(create_widget())),
 			children: Vec::new(),
-			phantom: PhantomData,
+			// phantom: PhantomData,
 		}
 	}
 }
 
-impl<S, I> Widget for List<S, I>
+impl<I> Widget for List<I>
 where
 	// S: AsRef<dyn Iterator<Item = I>>,
-	S: Debug,
-	S: Iterator,
-	S::Item: Borrow<I>,
 	I: State,
 {
-	type S = ListState<S, I>;
+	// type S = ListState<S, I>;
+	type S = std::slice::Iter<&'a, I>;
 
 	fn hit(&mut self, _ctx: &widget::HitCtx<Self::S>) -> Option<f32> {
 		None

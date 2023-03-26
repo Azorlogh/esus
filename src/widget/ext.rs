@@ -1,7 +1,7 @@
 use super::Widget;
 use crate::{native_widgets::*, state::State};
 
-pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
+pub trait WidgetExt<'a, S: State + 'a>: Widget<S = S> + Sized + 'static {
 	fn fix_width(self, width: f32) -> SizedBox<S> {
 		SizedBox::new(self).fix_width(width)
 	}
@@ -26,16 +26,16 @@ pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
 		SizedBox::new(self).with_padding(padding)
 	}
 
-	fn adapt<SP: State>(
-		self,
-		from_state: impl Fn(&SP) -> S + 'static,
-		to_message: impl Fn(S::Message) -> SP::Message + 'static,
-	) -> Adapter<S, SP> {
-		Adapter::new(self, from_state, to_message)
-	}
+	// fn adapt<SP: State>(
+	// 	self,
+	// 	from_state: impl for<'p> Fn(&'p SP) -> S + 'static,
+	// 	to_message: impl Fn(S::Message) -> SP::Message + 'static,
+	// ) -> Adapter<S, SP> {
+	// 	Adapter::new(self, from_state, to_message)
+	// }
 }
 
-impl<S: State, W: Widget<S = S> + 'static> WidgetExt<S> for W {}
+impl<'a, S: State + 'a, W: Widget<S = S> + 'static> WidgetExt<'a, S> for W {}
 
 // struct Foo;
 
