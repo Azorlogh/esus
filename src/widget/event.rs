@@ -1,5 +1,6 @@
-use crate::{device::DeviceStates, event::Event, state::State};
 use std::collections::VecDeque;
+
+use crate::{device::DeviceStates, event::Event, state::State};
 
 pub struct EventCtx<'a, S: State> {
 	pub state: &'a S,

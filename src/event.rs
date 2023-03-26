@@ -1,5 +1,6 @@
-use crate::{Point, Vector};
 use winit::event::MouseButton;
+
+use crate::{Point, Vector};
 
 #[derive(Debug, Clone)]
 pub struct MouseDown {

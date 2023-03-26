@@ -85,8 +85,8 @@ impl<S: State> SizedBox<S> {
 impl<S: State> Widget for SizedBox<S> {
 	type S = S;
 
-	fn hit(&mut self, _ctx: &widget::HitCtx<S>) -> Option<f32> {
-		None
+	fn hit(&mut self, ctx: &widget::HitCtx<S>) -> Option<f32> {
+		Some(self.child.as_mut().and_then(|c| c.hit(ctx)).unwrap_or(0.0))
 	}
 
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
@@ -98,7 +98,6 @@ impl<S: State> Widget for SizedBox<S> {
 			ctx.sc.max.height = height.min(ctx.sc.max.height).max(ctx.sc.min.height);
 			ctx.sc.min.height = ctx.sc.max.height
 		}
-		log::error!("{:?}", ctx.sc);
 		if let Some(padding) = self.padding {
 			ctx.sc.max -= Size::new(padding * 2.0, padding * 2.0);
 		}

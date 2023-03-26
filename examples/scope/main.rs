@@ -1,8 +1,7 @@
 use esus::{
 	instance,
-	native_widgets::{Button, Checkbox, DropDown, Flex, Label, LabelText, SizedBox},
+	native_widgets::{Checkbox, Flex},
 	widget::WidgetExt,
-	Color,
 };
 
 #[derive(Debug, Default)]

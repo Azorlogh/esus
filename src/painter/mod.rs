@@ -1,10 +1,10 @@
-use crate::{
-	render::{RenderCtx, Renderer},
-	Rect, Size,
-};
-
 use wgpu::DepthStencilState;
 use wgpu_glyph::{GlyphBrush, GlyphBrushBuilder, GlyphCruncher};
+
+use crate::{
+	render::{RenderCtx, Renderer},
+	Size,
+};
 
 mod brush;
 use brush::Brush;
@@ -41,11 +41,11 @@ impl Painter {
 		self.brush.resize(size);
 	}
 
-	pub fn measure_text(&mut self, rect: Rect, text: &str) -> Size {
+	pub fn measure_text(&mut self, text: &str) -> Size {
 		let section =
 			wgpu_glyph::Section::default().add_text(wgpu_glyph::Text::new(text).with_scale(20.0));
 		if let Some(bounds) = self.glyph_brush.glyph_bounds(section) {
-			Size::new(bounds.width().ceil(), bounds.height().ceil())
+			Size::new(bounds.width(), bounds.height())
 		} else {
 			Size::zero()
 		}

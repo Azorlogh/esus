@@ -1,6 +1,5 @@
-use crate::{event::Event, state::State, Size};
-
 use super::{EventCtx, HitCtx, Layout, LayoutCtx, PaintCtx, SizeCtx, Widget};
+use crate::{state::State, Size};
 
 #[derive(Debug)]
 pub struct Pod<S> {
@@ -31,7 +30,10 @@ impl<S: State> Pod<S> {
 impl<S: State> Pod<S> {
 	pub fn hit(&mut self, ctx: &HitCtx<S>) -> Option<f32> {
 		if let Some(layout) = self.layout {
-			log::warn!("hitting pod! {layout:?}");
+			log::debug!(
+				"checking if {:?} hits pod which has layout {layout:?}",
+				ctx.point
+			);
 			if layout.rect.contains(ctx.point) {
 				self.inner.hit(&ctx.clone_with_layout(layout))
 			} else {

@@ -1,4 +1,4 @@
-use crate::{painter::Painter, Rect, Size, SizeConstraints};
+use crate::{painter::Painter, Size, SizeConstraints};
 
 #[derive(Debug)]
 pub struct SizeCtx<'a, S> {
@@ -20,7 +20,7 @@ impl<'a, S> SizeCtx<'a, S> {
 		}
 	}
 
-	pub fn measure_text(&mut self, rect: Rect, text: &str) -> Size {
-		self.painter.measure_text(rect, text)
+	pub fn measure_text(&mut self, text: &str) -> Size {
+		self.painter.measure_text(text)
 	}
 }

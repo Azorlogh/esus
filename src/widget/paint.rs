@@ -1,8 +1,6 @@
 use lyon::path::Path;
 
-use crate::painter::Painter;
-use crate::render::RenderCtx;
-use crate::{Color, Layout, Rect, Size};
+use crate::{painter::Painter, render::RenderCtx, Color, Layout, Rect, Size};
 
 pub struct PaintCtx<'a, 'r, S> {
 	pub render_ctx: &'a mut RenderCtx<'r>,
@@ -24,8 +22,8 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 			.fill(self.render_ctx, path, self.layout.depth);
 	}
 
-	pub fn measure_text(&mut self, rect: Rect, text: &str) -> Size {
-		self.painter.measure_text(rect, text)
+	pub fn measure_text(&mut self, text: &str) -> Size {
+		self.painter.measure_text(text)
 	}
 
 	pub fn print(&mut self, rect: Rect, text: &str, color: Color) {

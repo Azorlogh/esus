@@ -1,88 +1,81 @@
-use crate::{state::State, widget::prelude::*, Color};
+use std::iter::once;
 
-use super::Button;
+use custom_debug::Debug;
+
+use crate::{
+	state::State,
+	widget::{prelude::*, HitCtx},
+};
 
 #[derive(Debug)]
 pub struct DropDown<S: State> {
-	color: Color,
-	button_size: Size,
-	// msg: Option<S::Message>,
-	child: Option<widget::Pod<S>>,
+	child: widget::Pod<S>,
+	#[debug(skip)]
+	menu_builder: Box<dyn Fn(&EventCtx<S>) -> widget::Pod<S> + 'static>,
 	menu: Option<widget::Pod<S>>,
 }
 
 impl<S: State> DropDown<S> {
-	pub fn new(child: impl Widget<S = S> + 'static) -> Self {
-		let mut s = Self::empty();
-		s.child = Some(widget::Pod::new(child));
-		s
-	}
-
-	pub fn empty() -> Self {
+	pub fn new<B, M>(child: impl Widget<S = S> + 'static, menu_builder: B) -> Self
+	where
+		B: Fn(&EventCtx<S>) -> M + 'static,
+		M: Widget<S = S> + 'static,
+	{
 		Self {
-			child: None,
-			button_size: Size::new(0.0, 0.0),
-			color: Color([150.0 / 255.0, 230.0 / 255.0, 100.0 / 255.0, 1.0]),
+			child: widget::Pod::new(child),
+			menu_builder: Box::new(move |ctx| widget::Pod::new(menu_builder(ctx))),
 			menu: None,
 		}
 	}
-
-	pub fn with_color(mut self, color: Color) -> Self {
-		self.color = color;
-		self
-	}
-
-	// pub fn on_click(mut self, msg: S::Message) -> Self {
-	// 	self.msg = Some(msg);
-	// 	self
-	// }
 }
 
 impl<S: State + 'static> Widget for DropDown<S> {
 	type S = S;
 
 	fn size(&mut self, ctx: &mut SizeCtx<S>) -> Size {
-		if let Some(child) = &mut self.child {
-			let size = child.size(ctx);
-			self.button_size = size;
-			size
-		} else {
-			ctx.sc.max
-		}
+		self.child.size(ctx)
 	}
 
 	fn layout(&mut self, mut ctx: LayoutCtx<Self::S>) -> Layout {
-		let mut rect = ctx.suggestion.rect;
-		if let Some(child) = &mut self.child {
-			child.layout(ctx.clone_with_layout(ctx.suggestion));
-			let child_layout = child.layout.unwrap();
-			rect = child_layout.rect;
-			if let Some(menu) = &mut self.menu {
-				let mut menu_size_ctx = ctx.create_size_context(SizeConstraints {
-					min: Size::new(0.0, 0.0),
-					max: Size::new(200.0, 400.0),
-				});
-				let menu_size = menu.size(&mut menu_size_ctx);
-				let menu_suggestion = Layout {
-					rect: Rect::new(
-						ctx.suggestion.rect.origin + Vector::new(0.0, self.button_size.height),
-						menu_size,
-					),
-					depth: ctx.suggestion.depth + 1.0,
-				};
-				menu.layout(ctx.clone_with_layout(menu_suggestion));
-				rect = rect.union(&menu.layout.unwrap().rect);
-			}
+		self.child.layout(ctx.clone_with_layout(ctx.suggestion));
+		let child_layout = self.child.layout.unwrap();
+		let mut rect = child_layout.rect;
+		if let Some(menu) = &mut self.menu {
+			let mut menu_size_ctx = ctx.create_size_context(SizeConstraints {
+				min: Size::new(0.0, 0.0),
+				max: Size::new(200.0, 400.0),
+			});
+			let menu_size = menu.size(&mut menu_size_ctx);
+			let menu_suggestion = Layout {
+				rect: Rect::new(
+					ctx.suggestion.rect.origin + Vector::new(0.0, child_layout.rect.height()),
+					menu_size,
+				),
+				depth: ctx.suggestion.depth + 1.0,
+			};
+			menu.layout(ctx.clone_with_layout(menu_suggestion));
+			rect = rect.union(&menu.layout.unwrap().rect);
 		}
 
 		Layout {
-			rect: rect,
+			rect,
 			depth: ctx.suggestion.depth,
 		}
 	}
 
-	fn hit(&mut self, _ctx: &widget::HitCtx<Self::S>) -> Option<f32> {
-		None
+	fn hit(&mut self, ctx: &widget::HitCtx<Self::S>) -> Option<f32> {
+		once(&mut self.child)
+			.chain(self.menu.iter_mut())
+			.map(|child| {
+				let hit = child.hit(ctx);
+				hit
+			})
+			.fold(None, |a, b| match (a, b) {
+				(Some(a), Some(b)) => Some(a.max(b)),
+				(Some(a), None) => Some(a),
+				(None, Some(b)) => Some(b),
+				(None, None) => None,
+			})
 	}
 
 	fn event(&mut self, ctx: &mut EventCtx<S>) {
@@ -93,14 +86,18 @@ impl<S: State + 'static> Widget for DropDown<S> {
 				// }
 				match &mut self.menu {
 					Some(menu) => {
-						// let mut menu_ctx = EventCtx::new(ctx.state, Event::MouseDown(ctx.event));
-						// menu.event(&mut menu_ctx);
-						self.menu = None;
+						let hit_ctx =
+							HitCtx::new(ctx.state, menu.layout.unwrap(), ctx.devices.mouse.pos);
+						if menu.hit(&hit_ctx).is_some() {
+							// let mut menu_ctx =
+							// 	EventCtx::new(ctx.state, Event::MouseDown(ctx.event));
+							menu.event(ctx);
+						} else {
+							self.menu = None;
+						}
 					}
 					None => {
-						self.menu = Some(widget::Pod::new(
-							Button::empty().with_color(Color([1.0, 0.0, 1.0, 1.0])),
-						));
+						self.menu = Some((self.menu_builder)(ctx));
 					}
 				}
 				ctx.request_redraw();
@@ -110,9 +107,7 @@ impl<S: State + 'static> Widget for DropDown<S> {
 	}
 
 	fn paint(&mut self, ctx: &mut PaintCtx<S>) {
-		if let Some(child) = &mut self.child {
-			child.paint(ctx);
-		}
+		self.child.paint(ctx);
 		if let Some(menu) = &mut self.menu {
 			menu.paint(ctx);
 		}

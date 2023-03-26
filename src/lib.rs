@@ -15,5 +15,6 @@ pub use state::State;
 pub mod widget;
 
 mod data;
-pub use data::*;
 pub use std::f64::INFINITY as INF;
+
+pub use data::*;

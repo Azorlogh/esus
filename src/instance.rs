@@ -1,3 +1,14 @@
+use std::os::raw::c_void;
+
+// use winapi::shared::windef::HWND;
+// use winit::platform::windows::WindowBuilderExtWindows
+use winit::{
+	dpi::PhysicalSize,
+	event_loop::{ControlFlow, EventLoop},
+	platform::run_return::EventLoopExtRunReturn,
+	window::{Window, WindowBuilder},
+};
+
 use crate::{
 	device::*,
 	event::*,
@@ -6,15 +17,6 @@ use crate::{
 	state::State,
 	widget::{self, Widget},
 	Point, Rect, Size,
-};
-use std::os::raw::c_void;
-// use winapi::shared::windef::HWND;
-// use winit::platform::windows::WindowBuilderExtWindows
-use winit::{
-	dpi::PhysicalSize,
-	event_loop::{ControlFlow, EventLoop},
-	platform::run_return::EventLoopExtRunReturn,
-	window::{Window, WindowBuilder},
 };
 
 pub struct Builder<S: State> {
@@ -91,7 +93,7 @@ impl<S: State> Builder<S> {
 
 		let size = window.inner_size();
 		{
-			let mut ctx = widget::LayoutCtx::new(
+			let ctx = widget::LayoutCtx::new(
 				&mut state,
 				crate::data::Layout {
 					rect: Rect::from_size(Size::new(size.width as f32, size.height as f32)),
@@ -138,6 +140,7 @@ impl<S: State> Instance<S> {
 
 	pub fn run_return(&mut self) {
 		use std::collections::VecDeque;
+
 		use winit::event as wevent;
 
 		let renderer = &mut self.renderer;
@@ -167,7 +170,7 @@ impl<S: State> Instance<S> {
 					renderer.resize(size);
 					painter.resize(size);
 					{
-						let mut ctx = widget::LayoutCtx::new(
+						let ctx = widget::LayoutCtx::new(
 							state,
 							crate::data::Layout {
 								rect: Rect::from_size(Size::new(
@@ -186,7 +189,7 @@ impl<S: State> Instance<S> {
 					println!("figuring out layout");
 					{
 						let size = window.inner_size();
-						let mut ctx = widget::LayoutCtx::new(
+						let ctx = widget::LayoutCtx::new(
 							state,
 							crate::data::Layout {
 								rect: Rect::from_size(Size::new(

@@ -1,16 +1,17 @@
 use std::borrow::Cow;
 
-use super::RenderCtx;
-use crate::{
-	render::{Renderer, Vertex},
-	Color,
-};
 use lyon::{
 	lyon_tessellation::{BuffersBuilder, FillOptions, FillTessellator, FillVertex, VertexBuffers},
 	path::Path,
 };
 use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalSize;
+
+use super::RenderCtx;
+use crate::{
+	render::{Renderer, Vertex},
+	Color,
+};
 
 const UNIFORM_SIZE: wgpu::BufferAddress = 16 * std::mem::size_of::<f32>() as wgpu::BufferAddress;
 const VERTEX_SIZE: wgpu::BufferAddress = 3 * std::mem::size_of::<f32>() as wgpu::BufferAddress;

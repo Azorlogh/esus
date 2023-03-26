@@ -1,6 +1,8 @@
-use crate::Point;
 use std::collections::HashMap;
+
 use winit::event::{MouseButton, ScanCode};
+
+use crate::Point;
 
 pub struct MouseState {
 	pub buttons: HashMap<MouseButton, bool>,

@@ -1,8 +1,5 @@
-use crate::painter::Painter;
-use crate::state::State;
-use crate::{Layout, SizeConstraints};
-
 use super::SizeCtx;
+use crate::{painter::Painter, state::State, Layout, SizeConstraints};
 
 pub struct LayoutCtx<'a, S: State> {
 	pub state: &'a S,
