@@ -1,7 +1,7 @@
 use super::Widget;
 use crate::{
 	native_widgets::{dynamic::DynamicState, *},
-	state::{AnyState, State},
+	state::State,
 };
 
 pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
@@ -37,8 +37,12 @@ pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
 		Adapter::new(self, from_state, to_message)
 	}
 
-	fn dynamic(self) -> Adapter<S, DynamicState> {
-		Adapter::new(self, |s: &DynamicState| s.state.downcast_ref().unwrap())
+	fn dynamic(self) -> AdapterRef<S, DynamicState> {
+		AdapterRef::new(
+			self,
+			|s: &DynamicState| s.state.downcast_ref::<S>().unwrap(),
+			|msg| Box::new(msg),
+		)
 	}
 }
 

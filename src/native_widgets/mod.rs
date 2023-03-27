@@ -21,4 +21,4 @@ mod checkbox;
 pub use checkbox::Checkbox;
 
 mod adapter;
-pub use adapter::Adapter;
+pub use adapter::{Adapter, AdapterRef};
