@@ -56,9 +56,7 @@ impl<S: State + std::fmt::Debug> Widget for Flex<S> {
 					max: ctx.sc.max,
 				});
 				let minor = self.axis.minor(child.widget.size(&mut ctx));
-				if minor > minor_size {
-					minor_size = minor;
-				}
+				minor_size = minor.max(minor_size);
 			}
 		}
 		self.axis.with_minor(ctx.sc.max, minor_size)

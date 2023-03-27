@@ -249,6 +249,7 @@ impl<S: State> Instance<S> {
 				_ => {}
 			}
 
+			// TODO: this loop is stupid, should apply the messages after each event
 			let mut messages = VecDeque::new();
 			for event in events {
 				let mut redraw_requested = false;
@@ -264,11 +265,24 @@ impl<S: State> Instance<S> {
 					window.request_redraw();
 				}
 			}
-			if messages.len() > 0 {
+			let updated = messages.len() > 0;
+			if updated {
 				window.request_redraw();
 			}
 			for msg in messages {
 				updater(state, msg);
+			}
+			if updated {
+				let mut redraw_requested = false;
+				let mut messages = VecDeque::new();
+				let mut ctx = widget::EventCtx::new(
+					&Event::Update,
+					state,
+					devices,
+					&mut redraw_requested,
+					&mut messages,
+				);
+				view.event(&mut ctx);
 			}
 		});
 	}

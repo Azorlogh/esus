@@ -27,6 +27,20 @@ impl<'a, S: State> EventCtx<'a, S> {
 		}
 	}
 
+	pub fn clone_with<'b, C: State>(
+		&'b mut self,
+		state: &'b C,
+		msg_queue: &'b mut VecDeque<C::Message>,
+	) -> EventCtx<'b, C> {
+		EventCtx {
+			state,
+			event: self.event,
+			devices: self.devices,
+			redraw_requested: self.redraw_requested,
+			msg_queue,
+		}
+	}
+
 	pub fn request_redraw(&mut self) {
 		*self.redraw_requested = true;
 	}

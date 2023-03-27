@@ -57,6 +57,30 @@ pub trait Widget: std::fmt::Debug {
 	fn paint(&mut self, _ctx: &mut PaintCtx<Self::S>) {}
 }
 
+impl<W: Widget + ?Sized> Widget for Box<W> {
+	type S = W::S;
+
+	fn hit(&mut self, ctx: &HitCtx<Self::S>) -> Option<f32> {
+		<W as Widget>::hit(self, ctx)
+	}
+
+	fn event(&mut self, ctx: &mut EventCtx<Self::S>) {
+		<W as Widget>::event(self, ctx)
+	}
+
+	fn size(&mut self, ctx: &mut SizeCtx<Self::S>) -> Size {
+		<W as Widget>::size(self, ctx)
+	}
+
+	fn layout(&mut self, ctx: LayoutCtx<Self::S>) -> Layout {
+		<W as Widget>::layout(self, ctx)
+	}
+
+	fn paint(&mut self, ctx: &mut PaintCtx<Self::S>) {
+		<W as Widget>::paint(self, ctx)
+	}
+}
+
 pub mod prelude {
 	pub use crate::{
 		event::Event,

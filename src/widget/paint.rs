@@ -15,6 +15,15 @@ pub enum DrawMode {
 }
 
 impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
+	pub fn clone_with<'b, C>(&'b mut self, state: &'b C, layout: Layout) -> PaintCtx<'b, 'r, C> {
+		PaintCtx {
+			render_ctx: &mut self.render_ctx,
+			painter: &mut self.painter,
+			state,
+			layout,
+		}
+	}
+
 	pub fn fill(&mut self, path: &Path, color: Color) {
 		self.painter.brush.set_color(self.render_ctx, color);
 		self.painter
@@ -63,8 +72,6 @@ impl<'a, 'r, S> PaintCtx<'a, 'r, S> {
 			)
 			.expect("something went wrong drawing glyphs");
 	}
-
-	// pub fn fill()
 
 	pub fn layout(&self) -> Layout {
 		self.layout.clone()

@@ -7,9 +7,7 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub struct DynamicState {
-	pub state: Box<dyn AnyState>,
-}
+pub struct DynamicState(pub Box<dyn AnyState>);
 
 // #[derive(Clone)]
 // pub struct DynamicMessage(Box<dyn AnyMessage>);

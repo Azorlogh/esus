@@ -28,6 +28,7 @@ impl MouseMove {
 
 #[derive(Debug, Clone)]
 pub enum Event {
+	Update,
 	MouseDown(MouseDown),
 	MouseUp(MouseUp),
 	MouseMove(MouseMove),

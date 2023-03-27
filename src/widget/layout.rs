@@ -16,6 +16,18 @@ impl<'a, S: State> LayoutCtx<'a, S> {
 		}
 	}
 
+	pub fn clone_with<'b, C: State>(
+		&'b mut self,
+		state: &'b C,
+		suggestion: Layout,
+	) -> LayoutCtx<'b, C> {
+		LayoutCtx {
+			state,
+			suggestion,
+			painter: self.painter,
+		}
+	}
+
 	pub fn clone_with_layout<'b>(&'b mut self, layout: Layout) -> LayoutCtx<'b, S> {
 		LayoutCtx {
 			state: self.state,

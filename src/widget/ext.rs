@@ -37,10 +37,18 @@ pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
 		Adapter::new(self, from_state, to_message)
 	}
 
+	fn adapt_ref<SP: State>(
+		self,
+		from_state: impl Fn(&SP) -> &S + 'static,
+		to_message: impl Fn(S::Message) -> SP::Message + 'static,
+	) -> AdapterRef<S, SP> {
+		AdapterRef::new(self, from_state, to_message)
+	}
+
 	fn dynamic(self) -> AdapterRef<S, DynamicState> {
 		AdapterRef::new(
 			self,
-			|s: &DynamicState| s.state.downcast_ref::<S>().unwrap(),
+			|s: &DynamicState| s.0.downcast_ref::<S>().unwrap(),
 			|msg| Box::new(msg),
 		)
 	}

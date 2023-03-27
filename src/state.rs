@@ -16,7 +16,8 @@ impl_downcast!(AnyState);
 
 impl<S: State + 'static> AnyState for S {}
 
-pub trait AnyMessage: std::fmt::Debug + DynClone {}
+pub trait AnyMessage: std::fmt::Debug + DynClone + Downcast {}
 dyn_clone::clone_trait_object!(AnyMessage);
+impl_downcast!(AnyMessage);
 
-impl<T: Message> AnyMessage for T {}
+impl<T: Message + 'static> AnyMessage for T {}

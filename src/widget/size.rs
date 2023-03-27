@@ -12,6 +12,14 @@ impl<'a, S> SizeCtx<'a, S> {
 		SizeCtx { state, sc, painter }
 	}
 
+	pub fn clone_with<'b, C>(&'b mut self, state: &'a C, sc: SizeConstraints) -> SizeCtx<'b, C> {
+		SizeCtx {
+			state,
+			sc,
+			painter: self.painter,
+		}
+	}
+
 	pub fn clone_with_size_constraints<'b>(&'b mut self, sc: SizeConstraints) -> SizeCtx<'b, S> {
 		SizeCtx {
 			state: self.state,

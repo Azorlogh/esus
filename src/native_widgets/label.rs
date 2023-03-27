@@ -23,6 +23,12 @@ impl<S> From<&str> for LabelText<S> {
 	}
 }
 
+impl<S, F: Fn(&S) -> String + 'static> From<F> for LabelText<S> {
+	fn from(f: F) -> LabelText<S> {
+		LabelText::Dynamic(Box::new(f))
+	}
+}
+
 impl<S> LabelText<S> {
 	pub fn new_dynamic(c: impl Fn(&S) -> String + 'static) -> Self {
 		Self::Dynamic(Box::new(c))
