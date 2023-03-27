@@ -1,5 +1,8 @@
 use super::Widget;
-use crate::{native_widgets::*, state::State};
+use crate::{
+	native_widgets::{dynamic::DynamicState, *},
+	state::{AnyState, State},
+};
 
 pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
 	fn fix_width(self, width: f32) -> SizedBox<S> {
@@ -32,6 +35,10 @@ pub trait WidgetExt<S: State>: Widget<S = S> + Sized + 'static {
 		to_message: impl Fn(S::Message) -> SP::Message + 'static,
 	) -> Adapter<S, SP> {
 		Adapter::new(self, from_state, to_message)
+	}
+
+	fn dynamic(self) -> Adapter<S, DynamicState> {
+		Adapter::new(self, |s: &DynamicState| s.state.downcast_ref().unwrap())
 	}
 }
 

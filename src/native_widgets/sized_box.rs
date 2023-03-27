@@ -30,6 +30,18 @@ impl<S: State> SizedBox<S> {
 		id
 	}
 
+	pub fn empty() -> SizedBox<S> {
+		let id = SizedBox {
+			child: None,
+			width: None,
+			height: None,
+			padding: None,
+			background: None,
+			align: Align2::default(),
+		};
+		id
+	}
+
 	pub fn fix_width(mut self, width: f32) -> Self {
 		self.width = Some(width);
 		self

@@ -70,7 +70,7 @@ impl<S: State> Widget for Button<S> {
 		match ctx.event {
 			Event::MouseDown(_) => {
 				if let Some(msg) = &self.msg {
-					ctx.send(msg.clone());
+					ctx.send((*msg).clone());
 				}
 			}
 			_ => {}

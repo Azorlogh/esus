@@ -21,6 +21,8 @@ bytemuck = "1.7"
 cgmath = "0.18.0"
 rand = "0.8"
 custom_debug = "0.5.1"
+dyn-clone = "1.0"
+downcast-rs = "1.2.0"
 
 [target.'cfg(target_os = "windows")'.dependencies.winapi]
 version = "0.3.6"
